@@ -8,6 +8,24 @@ from .models import User, Quiz
 
 main = Blueprint('main', __name__)
 
+@main.route('/quiz', methods=['GET', 'POST'])
+def quiz_view():
+    if request.method == 'POST':
+        prompt = request.form['prompt']
+        res = {}
+        res['answer'] = generateChatResponse(prompt)
+        
+        # Add the AI-generated answer to the database
+        quiz = Quiz(chat_gpt_input=res['answer'], user_id=session['user_id'])
+        db.session.add(quiz)
+        db.session.commit()
+        
+        return jsonify(res), 200
+
+    return render_template('quiz.html')
+
+
+
 @main.route('/')
 def index():
     return render_template('landing.html')
@@ -70,14 +88,29 @@ def dashboard():
 
     return render_template('dashboard.html')
 
-
 @main.route('/quiz', methods=['GET', 'POST'])
 def quiz():
     if request.method == 'POST':
         prompt = request.form['prompt']
-        res = {}
-        res['answer'] = generateChatResponse(prompt)
+        res = generateChatResponse(prompt)
+        
+        # Add the AI-generated answer to the database
+        quiz = Quiz(
+            question=res['question'],
+            correct_answer=res['correct_answer'],
+            wrong_answer_1=res['wrong_answer_1'],
+            wrong_answer_2=res['wrong_answer_2'],
+            wrong_answer_3=res['wrong_answer_3'],
+            user_id=session['user_id']
+        )
+        db.session.add(quiz)
+        db.session.commit()
+        
         return jsonify(res), 200
 
     return render_template('quiz.html')
+
+
+
+
 
