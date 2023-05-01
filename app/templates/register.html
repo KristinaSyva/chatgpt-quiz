@@ -1,0 +1,73 @@
+{% extends 'base.html' %} {% block title %}Register{% endblock %} {% block
+navbar %}
+
+<nav class="navbar navbar-light">
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item"></li>
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.register') }}">Register</a>
+      </li>
+    </ul>
+  </div>
+  <button
+    class="navbar-toggler ml-auto border-0"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</nav>
+{% endblock %} {% block content %}
+<div
+  class="container d-flex flex-column justify-content-center align-items-center"
+>
+  <h1 class="text-center page-header">Register</h1>
+  <p class="text-center">Just few clicks until your first quiz!</p>
+  <form method="POST" action="{{ url_for('main.register') }}" class="col-5">
+    <div class="form-group">
+      <label for="email">Email:</label>
+      <input
+        type="email"
+        name="email"
+        id="email"
+        required
+        class="form-control w-100 form-control-lg"
+      />
+    </div>
+    <div class="form-group">
+      <label for="password">Password:</label>
+      <input
+        type="password"
+        name="password"
+        id="password"
+        required
+        class="form-control w-100 form-control-lg"
+      />
+    </div>
+    <div class="form-group">
+      <label for="confirm_password">Confirm Password:</label>
+      <input
+        type="password"
+        name="confirm_password"
+        id="confirm_password"
+        required
+        class="form-control w-100 form-control-lg"
+      />
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Register</button>
+  </form>
+  <small
+    >Or
+    <a href="{{ url_for('main.login') }}">log in</a>
+    instead.</small
+  >
+</div>
+{% endblock %}

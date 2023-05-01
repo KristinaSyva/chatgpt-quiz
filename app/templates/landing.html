@@ -1,0 +1,52 @@
+{% extends 'base.html' %} {% block navbar %}
+
+<nav class="navbar navbar-light">
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item"></li>
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.register') }}">Register</a>
+      </li>
+    </ul>
+  </div>
+  <button
+    class="navbar-toggler ml-auto border-0"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+</nav>
+{% endblock %} {% block content %}
+<div class="separate-div"></div>
+<div class="row">
+  <div class="col-6">
+    <img
+      src="{{ url_for('static', filename='images/logo.svg') }}"
+      alt="Quiz IT!"
+      class="logo"
+    />
+    <p class="main-para">
+      Generate AI powered quizzes with just minutes to enjoy with friends,
+      coworkers and loved ones!
+    </p>
+    <div class="buttons">
+      <a href="{{ url_for('main.login') }}">
+        <button class="btn btn-primary">Login ></button>
+      </a>
+      <a href="{{ url_for('main.register') }}">
+        <button class="btn btn-primary" id="reg_btn">
+          <span>Register > </span>
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

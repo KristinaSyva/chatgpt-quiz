@@ -1,0 +1,80 @@
+body {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 400;
+    background-image: url("../images/bg.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    font-size: 16px;
+    color: #3b4787;
+  }
+  
+button:focus {
+    outline: none !important;
+  }
+
+.logo {
+    width: 450px; 
+    height: auto; 
+    padding-top: 10vh;
+    padding-bottom: 10vh;
+  }
+
+.btn-primary {
+    background-color: #3B4787;
+    font-weight: bolder;
+    padding: 1rem 4rem;
+    border: none;
+    margin-right: 3vh;
+    border-radius: 10px;
+    }
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+  
+  a:hover {
+    text-decoration: none;
+  }
+  
+.main-para {
+    font-size: 1.2em;
+    padding-bottom: 5vh;
+  }
+
+.separate-div {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 1000px;
+    height: 639px;
+    background-image: url("../images/Illustration.png");
+}
+  
+.navbar {
+    padding: 3rem 7rem 0 7rem;
+}
+
+.navbar-light .navbar-nav .active>.nav-link,
+.navbar-light .navbar-nav .nav-link,
+.navbar-light .navbar-nav .nav-link:hover,
+.navbar-light .navbar-brand,
+.navbar-light .navbar-brand:hover {
+    color: #3b4787;
+}
+.navbar-brand {
+    font-size: 1.1em;
+}
+
+.page-header, small {
+    padding: 3vh 0;
+}
+
+.my-input {
+    padding: 15px;
+    font-size: 20px;
+  }
+
