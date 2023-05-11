@@ -1,28 +1,55 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash
 
-
 from .aiapi import generateChatResponse
 from .extensions import db
-from .models import User, Quiz
+from .models import User, GameQuestions, GameAnswers, Quiz
 
 main = Blueprint('main', __name__)
+
 
 @main.route('/quiz', methods=['GET', 'POST'])
 def quiz_view():
     if request.method == 'POST':
         prompt = request.form['prompt']
-        res = {}
-        res['answer'] = generateChatResponse(prompt)
-        
-        # Add the AI-generated answer to the database
+        res = generateChatResponse(prompt)
+
+        print(res)
+
+        # Add the AI-generated questions to the database
         quiz = Quiz(chat_gpt_input=res['answer'], user_id=session['user_id'])
         db.session.add(quiz)
         db.session.commit()
-        
+
+        for i, question_text in enumerate(res['question_text'], start=1):
+            question = GameQuestions(question_number=i, question_text=question_text)
+            db.session.add(question)
+
+            # Add the answer options for the current question
+            for j, option in enumerate(res['answer_options'][i - 1], start=1):
+                if res['correct_answer']:
+                    correct_answer_letter = res['correct_answer'][i - 1][0]
+                    correct_answer_text = res['correct_answer'][i - 1][1]
+                    correct_answer_option = ord(correct_answer_letter.lower()) - ord('a') + 1
+                    correct_answer = (j == correct_answer_option)
+                else:
+                    correct_answer = False
+
+                answer = GameAnswers(
+                    question_number=i,
+                    answer_letter=chr(ord('a') + j - 1),
+                    answer_text=option,
+                    correct_answer=correct_answer
+                )
+                db.session.add(answer)
+
+        # Commit the changes to the database
+        db.session.commit()
+
         return jsonify(res), 200
 
     return render_template('quiz.html')
+
 
 
 

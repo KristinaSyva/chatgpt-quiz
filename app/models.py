@@ -1,13 +1,25 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from .extensions import db
 from datetime import datetime
+
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     chat_gpt_input = db.Column(db.String(1000), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+class GameQuestions(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_number = db.Column(db.Integer, nullable=False)
+    question_text = db.Column(db.String(1000), nullable=False)
 
-
+class GameAnswers(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    question_number = db.Column(db.Integer, nullable=False)
+    answer_letter = db.Column(db.String(1), nullable=False)
+    answer_text = db.Column(db.String(100), nullable=False)
+    correct_answer = db.Column(db.Boolean, nullable=False)
+    
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     password_hash = db.Column(db.String(128))
@@ -23,10 +35,4 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
-
-
-
-
-
-
+    
