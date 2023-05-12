@@ -1,15 +1,49 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash
 from datetime import datetime as dt
+from sqlalchemy import func
 
 from .aiapi import generateChatResponse
 from .extensions import db
-from .models import User, GameQuestions, GameAnswers #Quiz
+from .models import User, GameQuestions, GameAnswers, Quiz
 
 main = Blueprint('main', __name__)
 
 
-from flask import session
+
+@main.route('/generate-quiz', methods=['POST'])
+def generate_quiz():
+    # Generate the quiz here
+    # ...
+    # Assuming you have the generated quiz number
+
+    user_id = session.get('user_id')
+    quiz_number = request.form.get('quiz_number')
+
+    if user_id is None or quiz_number is None:
+        return "Invalid request", 400
+
+    quiz_url = f"/user-{user_id}-quiz-{quiz_number}"
+
+    # Return the quiz URL as the response
+    return jsonify({'quiz_url': quiz_url})
+
+
+@main.route('/user-<int:user_id>-quiz-<int:quiz_number>', methods=['GET'])
+def quiz_page(user_id, quiz_number):
+    quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
+    if quiz is None:
+        return "Quiz not found", 404
+
+    questions = GameQuestions.query.filter_by(user_id=user_id, quiz_number=quiz_number).all()
+    if not questions:
+        return "No questions found for the quiz", 404
+
+    return render_template('generated-quiz.html', quiz=quiz, questions=questions)
+
+
+
+
 
 @main.route('/quiz', methods=['GET', 'POST'])
 def quiz_view():
@@ -17,8 +51,6 @@ def quiz_view():
         if 'user_id' in session:
             user_id = session['user_id']  # Get the user_id from the session
         else:
-            # Handle the case when the user is not logged in
-            # You can choose to redirect them to a login page or handle it in a different way
             return "User not logged in", 401
 
         current_datetime = dt.now()  # Set the datetime value
@@ -26,9 +58,33 @@ def quiz_view():
         prompt = request.form['prompt']
         res = generateChatResponse(prompt)
 
+        # Determine the quiz_number for the user
+        quiz_number = (
+            db.session.query(func.max(Quiz.quiz_number))
+            .filter_by(user_id=user_id)
+            .scalar()
+        )
+        if quiz_number is None:
+            quiz_number = 1
+        else:
+            quiz_number += 1
+
+        # Create a new Quiz object
+        quiz = Quiz(user_id=user_id, datetime=current_datetime, quiz_number=quiz_number)
+        db.session.add(quiz)
+        db.session.commit()
+
         for i, question_text in enumerate(res['question_text'], start=1):
-            question = GameQuestions(user_id=user_id, datetime=current_datetime, question_number=i, question_text=question_text)
+            question = GameQuestions(
+                user_id=user_id,
+                datetime=current_datetime,
+                quiz_number=quiz_number,
+                question_number=i,
+                question_text=question_text,
+                quiz_id=quiz.id
+            )
             db.session.add(question)
+            db.session.commit()
 
             answer_options = res['answer_options']
             answer_options_per_question = answer_options[(i - 1) * 4: i * 4]  # Get the answer options for the current question
@@ -43,19 +99,18 @@ def quiz_view():
                 answer = GameAnswers(
                     user_id=user_id,
                     datetime=current_datetime,
-                    question_number=i,
+                    quiz_id=quiz.id,
+                    question_id=question.id,  # Use the question's ID
                     answer_letter=option_letter,
                     answer_text=option_text,
                     correct_answer=correct_answer
                 )
                 db.session.add(answer)
-
-        db.session.commit()
+                db.session.commit()
 
         return jsonify(res), 200
 
     return render_template('quiz.html')
-
 
 
 

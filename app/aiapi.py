@@ -59,5 +59,6 @@ def generateChatResponse(prompt):
     return {
         'question_text': [text[1] for text in question_text],
         'correct_answer': correct_answer,
-        'answer_options': answer_options
+        'answer_options': answer_options,
+        'answer': answer
     }

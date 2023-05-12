@@ -2,23 +2,37 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from .extensions import db
 from datetime import datetime
 
-
+class Quiz(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
+    quiz_number = db.Column(db.Integer, nullable=False)
     
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
+    quiz_number = db.Column(db.Integer, nullable=False)
     question_number = db.Column(db.Integer, nullable=False)
     question_text = db.Column(db.String(1000), nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+
+    quiz = db.relationship('Quiz', backref=db.backref('questions', lazy=True))
 
 class GameAnswers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
-    question_number = db.Column(db.Integer, nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('game_questions.id'), nullable=False)
     answer_letter = db.Column(db.String(1), nullable=False)
     answer_text = db.Column(db.String(1000), nullable=False)
     correct_answer = db.Column(db.Boolean, nullable=False)
+
+    quiz = db.relationship('Quiz', backref=db.backref('answers', lazy=True))
+    question = db.relationship('GameQuestions', backref=db.backref('answers', lazy=True))
+
+
 
     
 class User(db.Model):
@@ -37,10 +51,3 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-'''
-class Quiz(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    chat_gpt_input = db.Column(db.String(1000), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-'''

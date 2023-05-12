@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 from .routes import main
 from .config import config
-from .models import GameQuestions, GameAnswers #, Quiz
+from .models import GameQuestions, GameAnswers , Quiz
 from .extensions import db
 
 def create_app():
