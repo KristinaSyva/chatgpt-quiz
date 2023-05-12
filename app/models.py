@@ -6,15 +6,20 @@ from datetime import datetime
     
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
     question_number = db.Column(db.Integer, nullable=False)
     question_text = db.Column(db.String(1000), nullable=False)
 
 class GameAnswers(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
     question_number = db.Column(db.Integer, nullable=False)
     answer_letter = db.Column(db.String(1), nullable=False)
     answer_text = db.Column(db.String(1000), nullable=False)
     correct_answer = db.Column(db.Boolean, nullable=False)
+
     
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)

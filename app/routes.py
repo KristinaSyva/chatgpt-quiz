@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 from werkzeug.security import check_password_hash
+from datetime import datetime as dt
 
 from .aiapi import generateChatResponse
 from .extensions import db
@@ -8,14 +9,25 @@ from .models import User, GameQuestions, GameAnswers #Quiz
 main = Blueprint('main', __name__)
 
 
+from flask import session
+
 @main.route('/quiz', methods=['GET', 'POST'])
 def quiz_view():
     if request.method == 'POST':
+        if 'user_id' in session:
+            user_id = session['user_id']  # Get the user_id from the session
+        else:
+            # Handle the case when the user is not logged in
+            # You can choose to redirect them to a login page or handle it in a different way
+            return "User not logged in", 401
+
+        current_datetime = dt.now()  # Set the datetime value
+
         prompt = request.form['prompt']
         res = generateChatResponse(prompt)
 
         for i, question_text in enumerate(res['question_text'], start=1):
-            question = GameQuestions(question_number=i, question_text=question_text)
+            question = GameQuestions(user_id=user_id, datetime=current_datetime, question_number=i, question_text=question_text)
             db.session.add(question)
 
             answer_options = res['answer_options']
@@ -29,6 +41,8 @@ def quiz_view():
                     correct_answer = False
 
                 answer = GameAnswers(
+                    user_id=user_id,
+                    datetime=current_datetime,
                     question_number=i,
                     answer_letter=option_letter,
                     answer_text=option_text,
@@ -41,6 +55,7 @@ def quiz_view():
         return jsonify(res), 200
 
     return render_template('quiz.html')
+
 
 
 
