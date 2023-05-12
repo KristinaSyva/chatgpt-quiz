@@ -28,9 +28,6 @@ def generateChatResponse(prompt):
     except:
         answer = "Oops, you beat the AI."
 
-    print("Generated Answer:")
-    print(answer)
-
     # Extract question and answer from the cleaned answer string
     question_text = re.findall(r"(\d+\.)\s(.*?)<br>", answer)
 
@@ -52,16 +49,15 @@ def generateChatResponse(prompt):
     correct_answer_lines = re.findall(r"Answer:\s*([a-d])", answer, re.IGNORECASE)
     correct_answer = [option.lower() for option in correct_answer_lines]
 
-    print("Extracted Question Text:")
-    print([text[1] for text in question_text])
-    print("Correct Answer:")
-    print(correct_answer)
-    print("Answer Options:")
-    print(answer_options)
+    #print("Extracted Question Text:")
+    #print([text[1] for text in question_text])
+    #print("Correct Answer:")
+    #print(correct_answer)
+    #print("Answer Options:")
+    #print(answer_options)
 
     return {
         'question_text': [text[1] for text in question_text],
         'correct_answer': correct_answer,
-        'answer_options': answer_options,
-        'answer': answer
+        'answer_options': answer_options
     }

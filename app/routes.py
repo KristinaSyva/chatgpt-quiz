@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash
 
 from .aiapi import generateChatResponse
 from .extensions import db
-from .models import User, GameQuestions, GameAnswers, Quiz
+from .models import User, GameQuestions, GameAnswers #Quiz
 
 main = Blueprint('main', __name__)
 
@@ -14,41 +14,34 @@ def quiz_view():
         prompt = request.form['prompt']
         res = generateChatResponse(prompt)
 
-        print(res)
-
-        # Add the AI-generated questions to the database
-        quiz = Quiz(chat_gpt_input=res['answer'], user_id=session['user_id'])
-        db.session.add(quiz)
-        db.session.commit()
-
         for i, question_text in enumerate(res['question_text'], start=1):
             question = GameQuestions(question_number=i, question_text=question_text)
             db.session.add(question)
 
-            # Add the answer options for the current question
-            for j, option in enumerate(res['answer_options'][i - 1], start=1):
+            answer_options = res['answer_options']
+            answer_options_per_question = answer_options[(i - 1) * 4: i * 4]  # Get the answer options for the current question
+
+            for j, (option_letter, option_text) in enumerate(answer_options_per_question, start=1):
                 if res['correct_answer']:
-                    correct_answer_letter = res['correct_answer'][i - 1][0]
-                    correct_answer_text = res['correct_answer'][i - 1][1]
-                    correct_answer_option = ord(correct_answer_letter.lower()) - ord('a') + 1
+                    correct_answer_option = ord(res['correct_answer'][i - 1].lower()) - ord('a') + 1
                     correct_answer = (j == correct_answer_option)
                 else:
                     correct_answer = False
 
                 answer = GameAnswers(
                     question_number=i,
-                    answer_letter=chr(ord('a') + j - 1),
-                    answer_text=option,
+                    answer_letter=option_letter,
+                    answer_text=option_text,
                     correct_answer=correct_answer
                 )
                 db.session.add(answer)
 
-        # Commit the changes to the database
         db.session.commit()
 
         return jsonify(res), 200
 
     return render_template('quiz.html')
+
 
 
 
