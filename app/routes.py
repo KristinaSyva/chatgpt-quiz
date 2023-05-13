@@ -114,7 +114,7 @@ def generate_quiz():
             db.session.add(answer)
             db.session.commit()
 
-    return "Quiz generated and inserted successfully", 200
+    return redirect(url_for('main.dashboard')) 
 
 
 

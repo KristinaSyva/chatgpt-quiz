@@ -83,15 +83,15 @@ $("#quiz-button").click(function (event) {
           </div>
         </div>
       </a>`;
-
+  
       $("#list-group").append(ai_data);
-
+  
       console.log("Generated Quiz Number:", data.quiz_number);
-
-      window.location.href = data.quiz_url;
+  
+      window.location.href = "/dashboard";  // Redirect to the dashboard route
     },
     error: function () {
       console.log("Failed to generate quiz");
     }
-  });
+  });  
 });
