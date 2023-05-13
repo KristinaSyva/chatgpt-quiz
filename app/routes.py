@@ -13,35 +13,83 @@ main = Blueprint('main', __name__)
 
 @main.route('/generate-quiz', methods=['POST'])
 def generate_quiz():
-    # Generate the quiz here
-    # ...
-    # Assuming you have the generated quiz number
+    if 'user_id' in session:
+        user_id = session['user_id']
+    else:
+        return "User not logged in", 401
 
-    user_id = session.get('user_id')
-    quiz_number = request.form.get('quiz_number')
+    current_datetime = dt.now()
 
-    if user_id is None or quiz_number is None:
-        return "Invalid request", 400
+    prompt = request.form['prompt']
+    res = generateChatResponse(prompt)
+
+    quiz_number = (
+        db.session.query(func.max(Quiz.quiz_number))
+        .filter_by(user_id=user_id)
+        .scalar()
+    )
+    if quiz_number is None:
+        quiz_number = 1
+    else:
+        quiz_number += 1
+
+    quiz = Quiz(user_id=user_id, datetime=current_datetime, quiz_number=quiz_number)
+    db.session.add(quiz)
+    db.session.commit()
+
+    for i, question_text in enumerate(res['question_text'], start=1):
+        question = GameQuestions(
+            user_id=user_id,
+            datetime=current_datetime,
+            quiz_number=quiz_number,
+            question_number=i,
+            question_text=question_text,
+            quiz_id=quiz.id
+        )
+        db.session.add(question)
+        db.session.commit()
+
+        answer_options = res['answer_options']
+        answer_options_per_question = answer_options[(i - 1) * 4: i * 4]
+
+        for j, (option_letter, option_text) in enumerate(answer_options_per_question, start=1):
+            if res['correct_answer']:
+                correct_answer_option = ord(res['correct_answer'][i - 1].lower()) - ord('a') + 1
+                correct_answer = (j == correct_answer_option)
+            else:
+                correct_answer = False
+
+            answer = GameAnswers(
+                user_id=user_id,
+                datetime=current_datetime,
+                quiz_id=quiz.id,
+                question_id=question.id,
+                answer_letter=option_letter,
+                answer_text=option_text,
+                correct_answer=correct_answer
+            )
+            db.session.add(answer)
+            db.session.commit()
 
     quiz_url = f"/user-{user_id}-quiz-{quiz_number}"
-
-    # Return the quiz URL as the response
-    return jsonify({'quiz_url': quiz_url})
+    return jsonify({"quiz_number": quiz_number, "quiz_url": quiz_url}), 200
 
 
 @main.route('/user-<int:user_id>-quiz-<int:quiz_number>', methods=['GET'])
 def quiz_page(user_id, quiz_number):
-    quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
-    if quiz is None:
-        return "Quiz not found", 404
+    if 'user_id' in session:
+        if session['user_id'] == user_id:
+            quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
+            if quiz is None:
+                return "Quiz not found", 404
 
-    questions = GameQuestions.query.filter_by(user_id=user_id, quiz_number=quiz_number).all()
-    if not questions:
-        return "No questions found for the quiz", 404
+            questions = GameQuestions.query.filter_by(user_id=user_id, quiz_number=quiz_number).all()
+            if not questions:
+                return "No questions found for the quiz", 404
 
-    return render_template('generated-quiz.html', quiz=quiz, questions=questions)
+            return render_template('generated-quiz.html', quiz=quiz, questions=questions)
 
-
+    return "Unauthorized", 401
 
 
 @main.route('/quiz', methods=['GET', 'POST'])
