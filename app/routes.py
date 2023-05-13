@@ -41,13 +41,10 @@ def quiz_view():
 
         # Store the quiz data in the session
         session['quiz_data'] = res
-
-        print("Generated Quiz Data:", res)  # Print the generated quiz data to the terminal
-
+        #print("Generated Quiz Data:", res) 
         return jsonify(res), 200
 
     return render_template('quiz.html')
-
 
 
 @main.route('/generate-quiz', methods=['POST'])
@@ -60,7 +57,9 @@ def generate_quiz():
     current_datetime = dt.now()
 
     # Retrieve the quiz data from the request
-    res = request.get_json()
+    res = session.get('quiz_data')
+    
+    print("Generated Quiz Data:", res) 
 
     if res is None:
         return "Quiz data not found in request", 400
@@ -81,27 +80,27 @@ def generate_quiz():
     db.session.add(quiz)
     db.session.commit()
 
-    for i, question_text in enumerate(res['question_text'], start=1):
+    question_text = res['question_text']
+    correct_answer = res['correct_answer']
+    answer_options = res['answer_options']
+
+    for i in range(len(question_text)):
         question = GameQuestions(
             user_id=user_id,
             datetime=current_datetime,
             quiz_number=quiz_number,
-            question_number=i,
-            question_text=question_text,
+            question_number=i + 1,
+            question_text=question_text[i],
             quiz_id=quiz.id
         )
         db.session.add(question)
         db.session.commit()
 
-        answer_options = res['answer_options']
-        answer_options_per_question = answer_options[(i - 1) * 4: i * 4]
+        answer_options_per_question = answer_options[i * 4: (i + 1) * 4]
 
         for j, (option_letter, option_text) in enumerate(answer_options_per_question, start=1):
-            if res['correct_answer']:
-                correct_answer_option = ord(res['correct_answer'][i - 1].lower()) - ord('a') + 1
-                correct_answer = (j == correct_answer_option)
-            else:
-                correct_answer = False
+            correct_answer_option = ord(correct_answer[i].lower()) - ord('a') + 1
+            correct_answer_flag = (j == correct_answer_option)
 
             answer = GameAnswers(
                 user_id=user_id,
@@ -110,12 +109,14 @@ def generate_quiz():
                 question_id=question.id,
                 answer_letter=option_letter,
                 answer_text=option_text,
-                correct_answer=correct_answer
+                correct_answer=correct_answer_flag
             )
             db.session.add(answer)
             db.session.commit()
 
     return "Quiz generated and inserted successfully", 200
+
+
 
 
 @main.route('/')
