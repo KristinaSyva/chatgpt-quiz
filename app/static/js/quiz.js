@@ -42,17 +42,17 @@ function generateQuiz() {
         </div>
       </a>`;
       $("#list-group").append(ai_data);
-
-      // Access the 'answer' from the response data
-      console.log(data.answer);
-
+    
+      console.log("Generated Quiz Number:", data.quiz_number);
+    
       // Show the "Generate Quiz" button
       $("#quiz-button").removeClass("d-none");
     },
   });
 }
 
-$("#quiz-button").click(function () {
+$("#quiz-button").click(function (event) {
+  event.preventDefault(); 
   var prompt = $("#chat-input").val();
 
   let html_data = `
@@ -71,7 +71,8 @@ $("#quiz-button").click(function () {
   $.ajax({
     type: "POST",
     url: "/generate-quiz",
-    data: { prompt: prompt },
+    data: JSON.stringify({ prompt: prompt }),
+    contentType: "application/json",
     success: function (data) {
       let ai_data = `
       <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3">

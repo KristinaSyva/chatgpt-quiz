@@ -33,28 +33,21 @@ def generateChatResponse(prompt):
 
     correct_answer = []
     answer_options = []
-    for match in re.findall(r"([a-d])\. (.*?)(?=[a-d]\.|\s*Correct answer:|$)", answer):
-        option, content = match
+    correct_answer_matches = re.findall(r"(?:Answer:|answer:|Correct answer:)\s*([a-d])", answer, re.IGNORECASE)
+    for match in correct_answer_matches:
+        correct_answer.append(match.lower())
+
+    answer_option_matches = re.findall(r"([a-d])\. (.*?)(?=[a-d]\.|\s*(?:Answer:|answer:|Correct answer:)|$)", answer, re.IGNORECASE)
+    for option, content in answer_option_matches:
         if '*' in content:
-            correct_option = re.search(r"(a|b|c|d)\. ?", content)
-            if correct_option:
-                correct_option = correct_option.group(1)
+            correct_option_match = re.search(r"(a|b|c|d)\. ?", content)
+            if correct_option_match:
+                correct_option = correct_option_match.group(1)
                 content = content.replace('*', '').strip()  # Remove * symbol within answer options
-                correct_answer.append(correct_option)
+                correct_answer.append(correct_option.lower())
         else:
             content = re.sub(r"<br>", "", content)  # Remove <br> tags within answer options
             answer_options.append((option, content.strip()))
-
-    # Extract correct answers from the answer string
-    correct_answer_lines = re.findall(r"Answer:\s*([a-d])", answer, re.IGNORECASE)
-    correct_answer = [option.lower() for option in correct_answer_lines]
-
-    #print("Extracted Question Text:")
-    #print([text[1] for text in question_text])
-    #print("Correct Answer:")
-    #print(correct_answer)
-    #print("Answer Options:")
-    #print(answer_options)
 
     return {
         'question_text': [text[1] for text in question_text],
