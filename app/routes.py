@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime as dt
 from sqlalchemy import func
 
@@ -40,7 +40,6 @@ def quiz_page(user_id, quiz_number):
         return "No questions found for the quiz", 404
 
     return render_template('generated-quiz.html', quiz=quiz, questions=questions)
-
 
 
 
@@ -112,10 +111,6 @@ def quiz_view():
 
     return render_template('quiz.html')
 
-
-
-
-
 @main.route('/')
 def index():
     return render_template('landing.html')
@@ -123,23 +118,23 @@ def index():
 @main.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email']
+        identifier = request.form['identifier'].lower()  # Convert identifier to lowercase
         password = request.form['password']
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter(db.or_(func.lower(User.email) == identifier, func.lower(User.username) == identifier)).first()  # Use func.lower to convert email and username to lowercase
 
         if user and check_password_hash(user.password_hash, password):
             session['user_id'] = user.id
             flash('You have been logged in!', 'success')
             return redirect(url_for('main.dashboard'))
         else:
-            flash('Email or password is incorrect', 'danger')
+            flash('Username or password is incorrect', 'danger')
 
     return render_template('login.html')
-
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        username = request.form['username']  # Add username field
         email = request.form['email']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
@@ -148,12 +143,12 @@ def register():
             flash('Passwords do not match', 'danger')
             return redirect(url_for('main.register'))
 
-        existing_user = User.query.filter_by(email=email).first()
+        existing_user = User.query.filter(db.or_(User.email == email, User.username == username)).first()
         if existing_user:
-            flash('Email address already in use', 'danger')
+            flash('Email address or username already in use', 'danger')
             return redirect(url_for('main.register'))
 
-        new_user = User(email=email, password=password)
+        new_user = User(username=username, email=email, password=password)  # Add username field
         db.session.add(new_user)
         db.session.commit()
 
@@ -162,12 +157,45 @@ def register():
 
     return render_template('register.html')
 
-
 @main.route('/logout')
 def logout():
     session.clear()
     flash('You have been logged out.', 'success')
     return redirect(url_for('main.index'))
+
+@main.route('/account', methods=['GET', 'POST'])
+def account():
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('You need to be logged in to access your account.', 'danger')
+        return redirect(url_for('main.login'))
+
+    user = User.query.get(user_id)
+
+    if request.method == 'POST':
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+        confirm_password = request.form['confirm_password']
+
+        if not check_password_hash(user.password_hash, old_password):
+            flash('Incorrect old password. Please try again.', 'danger')
+            return redirect(url_for('main.account'))
+
+        if new_password != confirm_password:
+            flash('New password and confirm password do not match.', 'danger')
+            return redirect(url_for('main.account'))
+
+        user.password_hash = generate_password_hash(new_password)
+        db.session.commit()
+
+        flash('Password changed successfully! Please log in with your new password.', 'success')
+        session.clear()  # Clear the session to log the user out
+        return redirect(url_for('main.login'))
+
+    return render_template('account.html', user=user)
+
+
+
 
 
 @main.route('/dashboard')
@@ -177,30 +205,3 @@ def dashboard():
         return redirect(url_for('main.login'))
 
     return render_template('dashboard.html')
-
-@main.route('/quiz', methods=['GET', 'POST'])
-def quiz():
-    if request.method == 'POST':
-        prompt = request.form['prompt']
-        res = generateChatResponse(prompt)
-        
-        # Add the AI-generated answer to the database
-        quiz = Quiz(
-            question=res['question'],
-            correct_answer=res['correct_answer'],
-            wrong_answer_1=res['wrong_answer_1'],
-            wrong_answer_2=res['wrong_answer_2'],
-            wrong_answer_3=res['wrong_answer_3'],
-            user_id=session['user_id']
-        )
-        db.session.add(quiz)
-        db.session.commit()
-        
-        return jsonify(res), 200
-
-    return render_template('quiz.html')
-
-
-
-
-

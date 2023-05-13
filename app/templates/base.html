@@ -40,13 +40,16 @@
               >Dashboard</a
             >
           </li>
-          {% endif %} {% if request.path != url_for('main.quiz') %}
+          {% endif %} {% if request.path != url_for('main.quiz_view') %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('main.quiz') }}"
+            <a class="nav-link" href="{{ url_for('main.quiz_view') }}"
               >Create Quiz</a
             >
           </li>
           {% endif %}
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('main.account') }}">Account</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('main.logout') }}">Log out</a>
           </li>

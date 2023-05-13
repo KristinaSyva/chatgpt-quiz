@@ -30,8 +30,18 @@ navbar %}
   class="container d-flex flex-column justify-content-center align-items-center"
 >
   <h1 class="text-center page-header">Register</h1>
-  <p class="text-center">Just few clicks until your first quiz!</p>
+  <p class="text-center">Just a few clicks until your first quiz!</p>
   <form method="POST" action="{{ url_for('main.register') }}" class="col-5">
+    <div class="form-group">
+      <label for="username">Username:</label>
+      <input
+        type="text"
+        name="username"
+        id="username"
+        required
+        class="form-control w-100 form-control-lg"
+      />
+    </div>
     <div class="form-group">
       <label for="email">Email:</label>
       <input
@@ -64,10 +74,6 @@ navbar %}
     </div>
     <button type="submit" class="btn btn-primary btn-block">Register</button>
   </form>
-  <small
-    >Or
-    <a href="{{ url_for('main.login') }}">log in</a>
-    instead.</small
-  >
+  <small>Or <a href="{{ url_for('main.login') }}">log in</a> instead.</small>
 </div>
 {% endblock %}
