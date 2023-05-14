@@ -10,33 +10,19 @@
     {% for question in questions %}
     <h3>Question {{ question.question_number }}</h3>
     <p>{{ question.question_text }}</p>
-    {% set answer_options = question.answers %} {% set current_question_id =
-    question.id %}
+    {% set current_question_id = question.id %} {% for answer in answer_options
+    %} {% if answer.question_id == current_question_id %}
     <label class="radio-label">
-      <input type="radio" name="answer_{{ question.id }}" value="A" />
-      A. {% for answer in answer_options %} {% if answer.question_id ==
-      current_question_id and answer.answer_letter == 'A' %}{{
-      answer.answer_text }}{% endif %} {% endfor %}
+      <input
+        type="radio"
+        name="answer_{{ question.id }}"
+        value="{{ answer.answer_letter }}"
+      />
+      {{ answer.answer_letter }}. {{ answer.answer_text }}
     </label>
-    <label class="radio-label">
-      <input type="radio" name="answer_{{ question.id }}" value="B" />
-      B. {% for answer in answer_options %} {% if answer.question_id ==
-      current_question_id and answer.answer_letter == 'B' %}{{
-      answer.answer_text }}{% endif %} {% endfor %}
-    </label>
-    <label class="radio-label">
-      <input type="radio" name="answer_{{ question.id }}" value="C" />
-      C. {% for answer in answer_options %} {% if answer.question_id ==
-      current_question_id and answer.answer_letter == 'C' %}{{
-      answer.answer_text }}{% endif %} {% endfor %}
-    </label>
-    <label class="radio-label">
-      <input type="radio" name="answer_{{ question.id }}" value="D" />
-      D. {% for answer in answer_options %} {% if answer.question_id ==
-      current_question_id and answer.answer_letter == 'D' %}{{
-      answer.answer_text }}{% endif %} {% endfor %}
-    </label>
-    {% endfor %}
+    <br />
+    <!-- Add a line break after each answer option -->
+    {% endif %} {% endfor %} {% endfor %}
 
     <button class="btn btn-primary" type="submit">Submit Quiz</button>
   </form>

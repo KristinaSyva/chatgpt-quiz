@@ -10,6 +10,17 @@
   </p>
 
   <div id="list-group" class="list-group w-auto"></div>
+</br>
+  <div id="quiz-button" class="input-group justify-content-center mb-3 d-none">
+    <button id="generate-quiz-button" class="btn btn-primary">
+      Generate Quiz
+    </button>
+    <div class="input-group justify-content-center mb-3">
+      <p class="text-center">
+        </br>Or <a href=".">Refresh</a> the page a new prompt below to generate a new quiz:
+      </p>
+    </div>
+  </div>
 
   <div class="input-group mb-3">
     <input type="text" class="form-control" id="chat-input" />
@@ -21,14 +32,6 @@
     When entering a prompt be patient. It can take up to a minute for the quiz
     to be generated.
   </p>
-
-  <div id="quiz-button" class="input-group mb-3 d-none">
-    <div class="input-group-append">
-      <button id="generate-quiz-button" class="btn btn-primary">
-        Generate Quiz
-      </button>
-    </div>
-  </div>
 </div>
 {% endblock %} {% block footer %}
 <script

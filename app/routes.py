@@ -19,13 +19,19 @@ def quiz_page(user_id, quiz_number):
             if quiz is None:
                 return "Quiz not found", 404
 
-            questions = GameQuestions.query.filter_by(user_id=user_id, quiz_number=quiz_number).all()
+            questions = GameQuestions.query.filter_by(quiz_id=quiz.id).all()
             if not questions:
                 return "No questions found for the quiz", 404
 
-            return render_template('generated-quiz.html', quiz=quiz, questions=questions)
+            answer_options = []
+            for question in questions:
+                options = GameAnswers.query.filter_by(question_id=question.id).all()
+                answer_options.extend(options)
+
+            return render_template('generated-quiz.html', quiz=quiz, questions=questions, answer_options=answer_options)
 
     return "Unauthorized", 401
+
 
 
 @main.route('/quiz', methods=['GET', 'POST'])

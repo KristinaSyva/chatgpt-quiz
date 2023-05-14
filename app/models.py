@@ -4,9 +4,11 @@ from datetime import datetime
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    quiz_name = db.Column(db.String(255), nullable=True)
     user_id = db.Column(db.Integer, nullable=False)
     datetime = db.Column(db.DateTime, nullable=False)
     quiz_number = db.Column(db.Integer, nullable=False)
+    public_quiz = db.Column(db.Boolean, nullable=False, default=False)
     
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
