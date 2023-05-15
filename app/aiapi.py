@@ -9,7 +9,7 @@ def generateChatResponse(prompt):
     messages = []
     messages.append({
         "role": "system",
-        "content": "You are a quiz generator. The user gives you one word or a sentence. You will generate 10 quiz questions on the topic unless instructed otherwise. Each question is followed by the correct answer and 3 wrong answers. These 4 options are in random order. Here is an example: 1. What is the capital of Estonia? a. Helsinki b. Rome c. Tallinn d. Riga Correct answer: a DO NOT ADD A DOT (.) or anything else AFTER THIS"
+        "content": "You are a quiz generator. You will generate 10 quiz questions on unless instructed otherwise. Each question is followed by the correct answer and 3 wrong answers in random order. GOOD example: 1. What is the capital of Estonia? a. Helsinki b. Rome c. Tallinn d. Riga Correct answer: a 'Correct answer' should be followed by a colon and a space and the correct letter, NEVER the full correct answer'"
     })
 
     question = {
@@ -33,21 +33,21 @@ def generateChatResponse(prompt):
 
     correct_answer = []
     answer_options = []
-    correct_answer_matches = re.findall(r"(?:Answer:|answer:|Correct answer:)\s*([a-d])", answer, re.IGNORECASE)
-    for match in correct_answer_matches:
-        correct_answer.append(match.lower())
-
-    answer_option_matches = re.findall(r"([a-d])\. (.*?)(?=[a-d]\.|\s*(?:Answer:|answer:|Correct answer:)|$)", answer, re.IGNORECASE)
-    for option, content in answer_option_matches:
+    for match in re.findall(r"([a-d])\. (.*?)(?=[a-d]\.|\s*answer:|$)", answer, re.IGNORECASE):
+        option, content = match
         if '*' in content:
-            correct_option_match = re.search(r"(a|b|c|d)\. ?", content)
-            if correct_option_match:
-                correct_option = correct_option_match.group(1)
+            correct_option = re.search(r"(a|b|c|d)\. ?", content)
+            if correct_option:
+                correct_option = correct_option.group(1)
                 content = content.replace('*', '').strip()  # Remove * symbol within answer options
                 correct_answer.append(correct_option.lower())
         else:
             content = re.sub(r"<br>", "", content)  # Remove <br> tags within answer options
             answer_options.append((option, content.strip()))
+
+    # Extract correct answers from the answer string
+    correct_answer_lines = re.findall(r"Answer:\s*([a-d])", answer, re.IGNORECASE)
+    correct_answer = [option.lower() for option in correct_answer_lines]
 
     return {
         'question_text': [text[1] for text in question_text],
@@ -55,3 +55,4 @@ def generateChatResponse(prompt):
         'answer_options': answer_options,
         'answer': answer
     }
+
