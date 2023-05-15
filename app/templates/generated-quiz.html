@@ -2,11 +2,9 @@
 <div
   class="container d-flex flex-column justify-content-center align-items-center"
 >
-  <h1 class="mt-5">Quiz</h1>
-  <h2>Quiz Number: {{ quiz.quiz_number }}</h2>
-  <h2>User ID: {{ quiz.user_id }}</h2>
+  <form id="quiz-form" action="/submit-quiz" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
-  <form action="/submit-quiz" method="POST">
     {% for question in questions %}
     <h3>Question {{ question.question_number }}</h3>
     <p>{{ question.question_text }}</p>
@@ -21,10 +19,40 @@
       {{ answer.answer_letter }}. {{ answer.answer_text }}
     </label>
     <br />
-    <!-- Add a line break after each answer option -->
     {% endif %} {% endfor %} {% endfor %}
 
-    <button class="btn btn-primary" type="submit">Submit Quiz</button>
+    <button id="submit-button" class="btn btn-primary" type="submit">
+      Submit
+    </button>
   </form>
+
+  <div id="score-div" class="d-none">
+    <h2 id="score-text"></h2>
+  </div>
 </div>
+{% endblock %} {% block footer %}
+<script>
+  $(document).ready(function () {
+    $("#quiz-form").submit(function (event) {
+      event.preventDefault();
+
+      var form = $(this);
+      var url = form.attr("action");
+
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: form.serialize(),
+        success: function (response) {
+          var scorePercentage = response.score_percentage;
+          $("#score-text").text("Your score is " + scorePercentage + "%");
+          $("#score-div").removeClass("d-none");
+        },
+        error: function (error) {
+          console.log("Failed to submit the quiz.");
+        },
+      });
+    });
+  });
+</script>
 {% endblock %}

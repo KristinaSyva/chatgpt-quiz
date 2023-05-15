@@ -51,6 +51,8 @@
         class="form-control w-100 form-control-lg"
       />
     </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <!-- CSRF token -->
     <button type="submit" class="btn btn-primary btn-block">Login ></button>
   </form>
   <small

@@ -169,6 +169,48 @@ def rename_quiz(quiz_id):
 
 
 
+
+@main.route('/submit-quiz', methods=['POST'])
+def submit_quiz():
+    try:
+        user_answers = {}
+        for key, value in request.form.items():
+            if key.startswith('answer_'):
+                question_id = int(key.split('_')[1])
+                user_answers[question_id] = value
+
+        # Fetch correct answers from the database based on the question IDs
+        correct_answers = {}
+        for question_id in user_answers.keys():
+            question = GameQuestions.query.get(question_id)
+            if question is not None:
+                correct_answer = GameAnswers.query.filter_by(question_id=question.id, correct_answer=True).first()
+                if correct_answer is not None:
+                    correct_answers[question_id] = correct_answer.answer_letter
+
+        # Calculate the score
+        total_questions = len(correct_answers)
+        correct_count = sum(1 for question_id, user_answer in user_answers.items() if user_answer == correct_answers.get(question_id))
+
+        if total_questions > 0:
+            score_percentage = (correct_count / total_questions) * 100
+        else:
+            score_percentage = 0
+
+        # Return the score as JSON response
+        return jsonify(score_percentage=score_percentage)
+
+    except Exception as e:
+        # Log the error with traceback
+        import traceback
+        traceback.print_exc()
+
+        # Return an error response
+        return "Error processing quiz submission", 400
+
+
+
+
 @main.route('/')
 def index():
     return render_template('landing.html')

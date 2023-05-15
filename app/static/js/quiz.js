@@ -30,9 +30,13 @@ function generateQuiz() {
   $("#list-group").append(html_data);
 
   // Send AJAX request to generate quiz questions
+  var csrfToken = $('input[name="csrf_token"]').val(); // Retrieve the CSRF token
   $.ajax({
     type: "POST",
     url: "/quiz",
+    headers: {
+      'X-CSRFToken': csrfToken // Set the CSRF token as a header
+    },
     data: { prompt: question },
     success: function (data) {
       // Add AI response to chat log
@@ -65,9 +69,14 @@ $("#quiz-button").click(function (event) {
   $("#chat-input").val("");
   $("#list-group").append(html_data);
 
+  // Send AJAX request to generate the quiz
+  var csrfToken = $('input[name="csrf_token"]').val(); // Retrieve the CSRF token
   $.ajax({
     type: "POST",
     url: "/generate-quiz",
+    headers: {
+      'X-CSRFToken': csrfToken // Set the CSRF token as a header
+    },
     data: JSON.stringify({ prompt: prompt }),
     contentType: "application/json",
     success: function (data) {
