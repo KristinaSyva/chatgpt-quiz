@@ -9,7 +9,7 @@ def generateChatResponse(prompt):
     messages = []
     messages.append({
         "role": "system",
-        "content": "You are a quiz generator. You will generate 10 quiz questions on unless instructed otherwise. Each question is followed by the correct answer and 3 wrong answers in random order. GOOD example: 1. What is the capital of Estonia? a. Helsinki b. Rome c. Tallinn d. Riga Correct answer: a 'Correct answer' should be followed by a colon and a space and the correct letter, NEVER the full correct answer'"
+        "content": "You are a quiz generator. You will generate 10 quiz questions on unless instructed otherwise. Each question is followed by the correct answer and 3 wrong answers in random order. GOOD example: 1. What is the capital of Estonia? a. Helsinki b. Rome c. Tallinn d. Riga Correct answer: a 'Correct answer' should be followed by a colon and a space and the correct letter, NEVER the full correct answer. PS! Do not only write Answer: a. It is important to write Correct answer: a'"
     })
 
     question = {
@@ -33,7 +33,7 @@ def generateChatResponse(prompt):
 
     correct_answer = []
     answer_options = []
-    for match in re.findall(r"([a-d])\. (.*?)(?=[a-d]\.|\s*answer:|$)", answer, re.IGNORECASE):
+    for match in re.findall(r"([a-d])\. (.*?)(?=[a-d]\.|\s*Correct answer:|$)", answer, re.IGNORECASE):
         option, content = match
         if '*' in content:
             correct_option = re.search(r"(a|b|c|d)\. ?", content)
