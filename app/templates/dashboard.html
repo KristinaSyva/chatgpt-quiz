@@ -6,62 +6,157 @@
 >
 
 <div class="row mt-4">
+  {% for quiz in quizzes %}
   <div class="col-md-4">
     <div class="card mb-4">
       <div class="card-body">
-        <h5 class="card-title">Quiz 1</h5>
-        <p class="card-text">Date: May 13, 2023</p>
-        <button class="btn btn-primary">Play</button>
+        <h5 class="card-title">
+          {% if quiz.quiz_name %} {{ quiz.quiz_name }} {% else %} Quiz {{
+          quiz.quiz_number }} {% endif %}
+        </h5>
+        <p class="card-text">Created at: {{ quiz.datetime|safe }}</p>
+        <div class="d-flex justify-content-between">
+          <a
+            class="btn btn-primary"
+            href="{{ url_for('main.quiz_page', user_id=quiz.user_id, quiz_number=quiz.quiz_number) }}"
+            >Play</a
+          >
+          <button class="btn btn-info">Share</button>
+        </div>
         <div class="form-check form-switch mt-3">
           <input
             class="form-check-input"
             type="checkbox"
-            id="privacy-toggle-1"
+            id="privacy-toggle-{{ quiz.quiz_number }}"
+            {%
+            if
+            quiz.public_quiz
+            %}checked{%
+            endif
+            %}
+            onchange="togglePublic({{ quiz.id }}, '{{ csrf_token }}')"
           />
-          <label class="form-check-label" for="privacy-toggle-1">Private</label>
+          <label
+            class="form-check-label"
+            for="privacy-toggle-{{ quiz.quiz_number }}"
+            >Public</label
+          >
         </div>
-        <button class="btn btn-secondary mt-2">Share</button>
+        <div class="btn-group mt-2">
+          <button
+            class="btn btn-secondary"
+            data-toggle="modal"
+            data-target="#renameModal{{ quiz.id }}"
+            onclick="showRenameModal({{ quiz.id }})"
+          >
+            Rename
+          </button>
+          <a
+            class="btn btn-dark"
+            href="{{ url_for('main.delete_quiz', quiz_id=quiz.id) }}"
+            onclick="return confirm('Are you sure you want to delete this quiz?')"
+            >Delete</a
+          >
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-md-4">
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">Quiz 2</h5>
-        <p class="card-text">Date: May 13, 2023</p>
-        <button class="btn btn-primary">Play</button>
-        <div class="form-check form-switch mt-3">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="privacy-toggle-2"
-          />
-          <label class="form-check-label" for="privacy-toggle-2">Private</label>
+  <!-- Rename Modal -->
+  <div
+    class="d-none rename-modal-overlay"
+    id="renameModal{{ quiz.id }}"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="renameModal{{ quiz.id }}Label"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="renameModal{{ quiz.id }}Label">
+            Rename Quiz
+          </h5>
+          <button
+            type="button"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
-        <button class="btn btn-secondary mt-2">Share</button>
+        <div class="modal-body">
+          <form
+            action="{{ url_for('main.rename_quiz', quiz_id=quiz.id) }}"
+            method="POST"
+          >
+            <!-- Include the CSRF token -->
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+            <div class="form-group">
+              <label for="newName">New Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="newName{{ quiz.id }}"
+                name="new_name"
+                required
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="saveButton{{ quiz.id }}"
+            >
+              Save
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="col-md-4">
-    <div class="card mb-4">
-      <div class="card-body">
-        <h5 class="card-title">Quiz 3</h5>
-        <p class="card-text">Date: May 13, 2023</p>
-        <button class="btn btn-primary">Play</button>
-        <div class="form-check form-switch mt-3">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="privacy-toggle-3"
-          />
-          <label class="form-check-label" for="privacy-toggle-3">Private</label>
-        </div>
-        <button class="btn btn-secondary mt-2">Share</button>
-      </div>
-    </div>
-  </div>
+  {% endfor %}
 </div>
+
+<script>
+  function togglePublic(quizId, csrfToken) {
+    var checkbox = document.getElementById("privacy-toggle-" + quizId);
+    var isPublic = checkbox.checked;
+    var url = "{{ url_for('main.toggle_public') }}";
+
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({ quizId: quizId, isPublic: isPublic }),
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrfToken,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        // Handle response as needed
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+
+  function showRenameModal(quizId) {
+    var modal = document.getElementById("renameModal" + quizId);
+
+    // Remove the d-none class to make the modal visible
+    modal.classList.remove("d-none");
+
+    // Add an event listener to the close button to handle the close action
+    var closeButton = modal.querySelector(".close");
+    closeButton.addEventListener("click", function () {
+      // Hide the modal by adding back the d-none class
+      modal.classList.add("d-none");
+    });
+  }
+</script>
 
 {% endblock %}

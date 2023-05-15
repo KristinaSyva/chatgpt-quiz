@@ -1,8 +1,9 @@
 from flask import Flask, render_template, jsonify, request
 import os
 import openai
-import aiapi
+#import aiapi
 from dotenv import load_dotenv
+from flask_wtf.csrf import CSRFProtect
 
 from .routes import main
 from .config import config
@@ -15,6 +16,7 @@ def create_app():
     # Load the configuration settings
     config_name = os.environ.get('FLASK_ENV', 'development')
     app.config.from_object(config[config_name])
+    csrf = CSRFProtect(app)
 
     db.init_app(app)
     

@@ -124,6 +124,50 @@ def generate_quiz():
 
 
 
+@main.route('/delete-quiz/<int:quiz_id>', methods=['GET', 'POST'])
+def delete_quiz(quiz_id):
+    if 'user_id' not in session:
+        flash('You must be logged in to delete a quiz', 'warning')
+        return redirect(url_for('main.login'))
+
+    # Retrieve the quiz by ID
+    quiz = Quiz.query.get(quiz_id)
+
+    if not quiz:
+        flash('Quiz not found', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    # Check if the logged-in user is the owner of the quiz
+    if quiz.user_id != session['user_id']:
+        flash('You are not authorized to delete this quiz', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    # Delete the associated GameQuestions and GameAnswers records
+    game_questions = GameQuestions.query.filter_by(quiz_id=quiz.id).all()
+    for question in game_questions:
+        GameAnswers.query.filter_by(question_id=question.id).delete()
+    GameQuestions.query.filter_by(quiz_id=quiz.id).delete()
+
+    # Delete the quiz
+    db.session.delete(quiz)
+    db.session.commit()
+
+    flash('Quiz deleted successfully', 'success')
+    return redirect(url_for('main.dashboard'))
+
+
+@main.route('/rename_quiz/<int:quiz_id>', methods=['POST'])
+def rename_quiz(quiz_id):
+    new_name = request.form.get('new_name')
+    print("New Name:", new_name)
+    # Update the quiz_name in the database
+    quiz = Quiz.query.get(quiz_id)
+    quiz.quiz_name = new_name
+    db.session.commit()
+
+    return redirect(url_for('main.dashboard'))
+
+
 
 @main.route('/')
 def index():
@@ -214,8 +258,34 @@ def account():
 
 @main.route('/dashboard')
 def dashboard():
-    if not session.get('user_id'):
+    if 'user_id' not in session:
         flash('You must be logged in to access the dashboard', 'warning')
         return redirect(url_for('main.login'))
 
-    return render_template('dashboard.html')
+    user_id = session['user_id']
+
+    quizzes = Quiz.query.filter_by(user_id=user_id).order_by(Quiz.datetime.desc()).all()
+
+    for quiz in quizzes:
+        quiz.datetime = quiz.datetime.strftime('%B %d, %Y %H:%M')  # Format the date as desired
+
+    # Sort the quizzes based on their public status (public quizzes first)
+    quizzes.sort(key=lambda quiz: not quiz.public_quiz)
+
+    return render_template('dashboard.html', quizzes=quizzes)
+
+
+
+@main.route('/toggle_public', methods=['POST'])
+def toggle_public():
+    data = request.get_json()
+    quiz_id = data.get('quizId')
+    is_public = data.get('isPublic')
+
+    # Update the public_quiz attribute for the quiz with the given ID
+    quiz = Quiz.query.get(quiz_id)
+    if quiz:
+        quiz.public_quiz = is_public
+        db.session.commit()
+
+    return jsonify({'success': True})
