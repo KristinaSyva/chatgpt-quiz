@@ -34,9 +34,16 @@ class GameAnswers(db.Model):
     quiz = db.relationship('Quiz', backref=db.backref('answers', lazy=True))
     question = db.relationship('GameQuestions', backref=db.backref('answers', lazy=True))
 
+class Scores(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    datetime = db.Column(db.DateTime, nullable=False)
+    score_percentage = db.Column(db.Float, nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
 
-
-    
+    user = db.relationship('User', backref=db.backref('scores', lazy=True))
+    quiz = db.relationship('Quiz', backref=db.backref('scores', lazy=True))
+   
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)  # Add username field

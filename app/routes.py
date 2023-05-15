@@ -2,10 +2,12 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime as dt
 from sqlalchemy import func
+from datetime import datetime
+
 
 from .aiapi import generateChatResponse
 from .extensions import db
-from .models import User, GameQuestions, GameAnswers, Quiz
+from .models import User, GameQuestions, GameAnswers, Quiz, Scores
 
 main = Blueprint('main', __name__)
 
@@ -13,24 +15,24 @@ main = Blueprint('main', __name__)
 
 @main.route('/user-<int:user_id>-quiz-<int:quiz_number>', methods=['GET'])
 def quiz_page(user_id, quiz_number):
-    if 'user_id' in session:
-        if session['user_id'] == user_id:
-            quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
-            if quiz is None:
-                return "Quiz not found", 404
+    quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
+    if quiz is None:
+        return "Quiz not found", 404
 
-            questions = GameQuestions.query.filter_by(quiz_id=quiz.id).all()
-            if not questions:
-                return "No questions found for the quiz", 404
+    if quiz.public_quiz or ('user_id' in session and session['user_id'] == user_id):
+        questions = GameQuestions.query.filter_by(quiz_id=quiz.id).all()
+        if not questions:
+            return "No questions found for the quiz", 404
 
-            answer_options = []
-            for question in questions:
-                options = GameAnswers.query.filter_by(question_id=question.id).all()
-                answer_options.extend(options)
+        answer_options = []
+        for question in questions:
+            options = GameAnswers.query.filter_by(question_id=question.id).all()
+            answer_options.extend(options)
 
-            return render_template('generated-quiz.html', quiz=quiz, questions=questions, answer_options=answer_options)
+        return render_template('generated-quiz.html', quiz=quiz, questions=questions, answer_options=answer_options)
 
     return "Unauthorized", 401
+
 
 
 
@@ -170,6 +172,8 @@ def rename_quiz(quiz_id):
 
 
 
+
+
 @main.route('/submit-quiz', methods=['POST'])
 def submit_quiz():
     try:
@@ -197,6 +201,22 @@ def submit_quiz():
         else:
             score_percentage = 0
 
+        # Check if the user has already taken the same quiz
+        quiz_id = int(request.form.get('quiz_id'))
+        user_id = session.get('user_id')
+        existing_score = Scores.query.filter_by(user_id=user_id, quiz_id=quiz_id).first()
+
+        if existing_score:
+            # Update the existing score
+            existing_score.score_percentage = score_percentage
+            existing_score.datetime = dt.now()
+        else:
+            # Create a new Scores record
+            score = Scores(user_id=user_id, datetime=dt.now(), score_percentage=score_percentage, quiz_id=quiz_id)
+            db.session.add(score)
+
+        db.session.commit()
+
         # Return the score as JSON response
         return jsonify(score_percentage=score_percentage)
 
@@ -207,6 +227,22 @@ def submit_quiz():
 
         # Return an error response
         return "Error processing quiz submission", 400
+
+
+
+
+
+@main.route('/user-<int:user_id>-quiz-<int:quiz_number>/score', methods=['GET'])
+def scoreboard(user_id, quiz_number):
+    user_ids = [score.user_id for score in Scores.query.all()]
+    usernames = [user.username for user in User.query.filter(User.id.in_(user_ids)).all()]
+    quiz = Quiz.query.filter_by(quiz_number=quiz_number).first()
+    return render_template('scoreboard.html', usernames=usernames, quiz=quiz)
+
+
+
+
+
 
 
 
@@ -306,15 +342,17 @@ def dashboard():
 
     user_id = session['user_id']
 
-    quizzes = Quiz.query.filter_by(user_id=user_id).order_by(Quiz.datetime.desc()).all()
+    user_quizzes = Quiz.query.filter_by(user_id=user_id).order_by(Quiz.datetime.desc()).all()
+    public_quizzes = Quiz.query.filter(Quiz.public_quiz, Quiz.user_id != user_id).order_by(Quiz.datetime.desc()).all()
 
-    for quiz in quizzes:
+    for quiz in user_quizzes:
         quiz.datetime = quiz.datetime.strftime('%B %d, %Y %H:%M')  # Format the date as desired
 
-    # Sort the quizzes based on their public status (public quizzes first)
-    quizzes.sort(key=lambda quiz: not quiz.public_quiz)
+    for quiz in public_quizzes:
+        quiz.datetime = quiz.datetime.strftime('%B %d, %Y %H:%M')  # Format the date as desired
 
-    return render_template('dashboard.html', quizzes=quizzes)
+    return render_template('dashboard.html', user_quizzes=user_quizzes, public_quizzes=public_quizzes)
+
 
 
 

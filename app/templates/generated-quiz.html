@@ -1,9 +1,63 @@
-{% extends 'base.html' %} {% block content %}
+{% extends 'base.html' %}{% block navbar %}
+<nav class="navbar navbar-light">
+  <span class="navbar-brand"
+    >{% if quiz.quiz_name %} {{ quiz.quiz_name }} {% else %} Quiz {{
+    quiz.quiz_number }} {% endif %}</span
+  >
+  {% if session.get('user_id') %}
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      {% if request.path != url_for('main.dashboard') %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+      </li>
+      {% endif %} {% if request.path != url_for('main.quiz_view') %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.quiz_view') }}"
+          >Create Quiz</a
+        >
+      </li>
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.account') }}">Account</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.logout') }}">Log out</a>
+      </li>
+    </ul>
+  </div>
+  <button
+    class="navbar-toggler ml-auto border-0"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  {% else %}
+  <button
+    class="navbar-toggler ml-auto border-0"
+    type="button"
+    data-bs-toggle="collapse"
+    data-bs-target="#navbarNav"
+    aria-controls="navbarNav"
+    aria-expanded="false"
+    aria-label="Toggle navigation"
+  >
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  {% endif %}
+</nav>
+{% endblock %} {% block content %}
 <div
   class="container d-flex flex-column justify-content-center align-items-center"
 >
-  <form id="quiz-form" action="/submit-quiz" method="POST">
+  <form id="quiz-form" action="{{ url_for('main.submit_quiz') }}" method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" name="quiz_id" value="{{ quiz.id }}" />
 
     {% for question in questions %}
     <h3>Question {{ question.question_number }}</h3>
@@ -28,6 +82,9 @@
 
   <div id="score-div" class="d-none">
     <h2 id="score-text"></h2>
+    <button class="btn btn-primary" onclick="window.location.href='{{ url_for("main.scoreboard", user_id=session.get("user_id"), quiz_number=quiz.quiz_number) }}'">
+      Scoreboard
+    </button>       
   </div>
 </div>
 {% endblock %} {% block footer %}

@@ -1,12 +1,11 @@
 {% extends 'base.html' %} {% block content %}
 <h1>Welcome to the Dashboard</h1>
-<p>Here you can create a new quiz:</p>
 <a class="btn btn-primary" href="{{ url_for('main.quiz_view') }}"
-  >Create Quiz</a
->
-
+  >Create a new Quiz</a
+><br /><br />
+<h2>My quizzes</h2>
 <div class="row mt-4">
-  {% for quiz in quizzes %}
+  {% for quiz in user_quizzes %}
   <div class="col-md-4">
     <div class="card mb-4">
       <div class="card-body">
@@ -27,14 +26,15 @@
           <input
             class="form-check-input"
             type="checkbox"
-            id="privacy-toggle-{{ quiz.quiz_number }}"
+            id="privacy-toggle-{{ quiz.id }}"
             {%
             if
             quiz.public_quiz
             %}checked{%
             endif
             %}
-            onchange="togglePublic({{ quiz.id }}, '{{ csrf_token }}')"
+            data-csrf="{{ csrf_token() }}"
+            onchange="togglePublic({{ quiz.id }})"
           />
           <label
             class="form-check-label"
@@ -42,6 +42,8 @@
             >Public</label
           >
         </div>
+        <input type="hidden" id="csrf-token" value="{{ csrf_token() }}" />
+
         <div class="btn-group mt-2">
           <button
             class="btn btn-secondary"
@@ -118,12 +120,35 @@
   </div>
 
   {% endfor %}
-</div>
+  <div class="col-12"><h2>Public quizzes</h2></div>
+  {% for quiz in public_quizzes %}
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">
+          {% if quiz.quiz_name %} {{ quiz.quiz_name }} {% else %} Quiz {{
+          quiz.quiz_number }} {% endif %}
+        </h5>
+        <p class="card-text">Created at: {{ quiz.datetime|safe }}</p>
+        <div class="d-flex justify-content-between">
+          <a
+            class="btn btn-primary"
+            href="{{ url_for('main.quiz_page', user_id=quiz.user_id, quiz_number=quiz.quiz_number) }}"
+            >Play</a
+          >
+          <button class="btn btn-info">Share</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  {% endfor %}
+</div>
 <script>
-  function togglePublic(quizId, csrfToken) {
+  function togglePublic(quizId) {
     var checkbox = document.getElementById("privacy-toggle-" + quizId);
     var isPublic = checkbox.checked;
+    var csrfToken = checkbox.getAttribute("data-csrf");
     var url = "{{ url_for('main.toggle_public') }}";
 
     fetch(url, {
@@ -158,5 +183,4 @@
     });
   }
 </script>
-
 {% endblock %}
