@@ -234,10 +234,18 @@ def submit_quiz():
 
 @main.route('/user-<int:user_id>-quiz-<int:quiz_number>/score', methods=['GET'])
 def scoreboard(user_id, quiz_number):
-    user_ids = [score.user_id for score in Scores.query.all()]
-    usernames = [user.username for user in User.query.filter(User.id.in_(user_ids)).all()]
+    scores = Scores.query.filter_by(quiz_id=quiz_number).all()
+    user_scores = [(score.user.username, score.score_percentage) for score in scores]
     quiz = Quiz.query.filter_by(quiz_number=quiz_number).first()
-    return render_template('scoreboard.html', usernames=usernames, quiz=quiz)
+
+    # Print statements for debugging
+    print("Scores:", scores)
+    print("User Scores:", user_scores)
+    print("Quiz:", quiz)
+
+    return render_template('scoreboard.html', user_scores=user_scores, quiz=quiz)
+
+
 
 
 

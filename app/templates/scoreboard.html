@@ -1,17 +1,20 @@
 {% extends 'base.html' %} {% block content %}
+
 <div class="container">
   <h1>Quiz Scores</h1>
   <h2>{{ quiz.quiz_number }}</h2>
   <table class="table">
     <thead>
       <tr>
-        <th>Users</th>
+        <th>Username</th>
+        <th>Score Percentage</th>
       </tr>
     </thead>
     <tbody>
-      {% for username in usernames %}
+      {% for username, score_percentage in user_scores %}
       <tr>
         <td>{{ username }}</td>
+        <td>{{ score_percentage }}</td>
       </tr>
       {% endfor %}
     </tbody>

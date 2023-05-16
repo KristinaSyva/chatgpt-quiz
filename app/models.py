@@ -9,6 +9,8 @@ class Quiz(db.Model):
     datetime = db.Column(db.DateTime, nullable=False)
     quiz_number = db.Column(db.Integer, nullable=False)
     public_quiz = db.Column(db.Boolean, nullable=False, default=False)
+
+    scores = db.relationship('Scores', backref='quiz', lazy=True)
     
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
