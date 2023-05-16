@@ -1,12 +1,12 @@
 {% extends 'base.html' %} {% block content %}
 <br />
-<h1>Welcome to <b>Quiz Genius!</b></h1>
+<h1>We welcome <b>{{ user.username|capitalize }}</b> to <b>Quiz Genius!</b></h1>
 <br />
 <a class="btn btn-primary" href="{{ url_for('main.quiz_view') }}"
   >Create a new Quiz</a
 ><br /><br />
 
-<h2>My quizzes</h2>
+<h3>My quizzes</h3>
 <div class="row mt-4">
   {% for quiz in user_quizzes %}
   <div class="col-md-4">
@@ -17,9 +17,9 @@
           quiz.quiz_number }} {% endif %}
         </h5>
         <p class="card-text">Created at: {{ quiz.datetime|safe }}</p>
-        <div class="d-flex justify-content-between">
+        <div class="d-flex">
           <button
-            class="btn btn-primary"
+            class="btn btn-info"
             onclick="window.location.href='{{ url_for('main.quiz_page', user_id=quiz.user_id, quiz_number=quiz.quiz_number) }}'"
           >
             Play
@@ -132,7 +132,11 @@
 
   {% endfor %}
   <br />
-  <div class="col-12"><h2>Public quizzes</h2></div>
+  <div class="col-12">
+    <br />
+    <h3>Other users' quizzes</h3>
+    <br />
+  </div>
   {% for quiz in public_quizzes %}
   <div class="col-md-4">
     <div class="card mb-4">
@@ -142,13 +146,18 @@
           quiz.quiz_number }} {% endif %}
         </h5>
         <p class="card-text">Created at: {{ quiz.datetime|safe }}</p>
-        <div class="d-flex justify-content-between">
+        <div class="d-flex">
           <a
-            class="btn btn-primary"
+            class="btn btn-info"
             href="{{ url_for('main.quiz_page', user_id=quiz.user_id, quiz_number=quiz.quiz_number) }}"
             >Play</a
           >
-          <button class="btn btn-info">Share</button>
+          <button
+            class="btn btn-info ml-2"
+            onclick="window.location.href='{{ url_for('main.scoreboard', creator_id=quiz.user_id, quiz_number=quiz.quiz_number) }}'"
+          >
+            Scores
+          </button>
         </div>
       </div>
     </div>

@@ -16,25 +16,34 @@ main = Blueprint('main', __name__)
 
 @main.route('/user-<int:user_id>-quiz-<int:quiz_number>', methods=['GET'])
 def quiz_page(user_id, quiz_number):
-    quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
-    if quiz is None:
-        return "Quiz not found", 404
+    try:
+        quiz = Quiz.query.filter_by(user_id=user_id, quiz_number=quiz_number).first()
+        if quiz is None:
+            return "Quiz not found", 404
 
-    if quiz.public_quiz or ('user_id' in session and session['user_id'] == user_id):
-        questions = GameQuestions.query.filter_by(quiz_id=quiz.id).all()
-        if not questions:
-            return "No questions found for the quiz", 404
+        if quiz.public_quiz or ('user_id' in session and session['user_id'] == user_id):
+            questions = GameQuestions.query.filter_by(quiz_id=quiz.id).all()
+            if not questions:
+                return "No questions found for the quiz", 404
 
-        answer_options = []
-        for question in questions:
-            options = GameAnswers.query.filter_by(question_id=question.id).all()
-            answer_options.extend(options)
+            answer_options = []
+            for question in questions:
+                options = GameAnswers.query.filter_by(question_id=question.id).all()
+                answer_options.extend(options)
 
-        return render_template('generated-quiz.html', quiz=quiz, questions=questions, answer_options=answer_options)
+            user_scores = Scores.query.filter_by(user_id=session.get('user_id'), quiz_id=quiz.id).all()
+            existing_scores_count = len(user_scores)
 
-    return "Unauthorized", 401
+            return render_template('generated-quiz.html', quiz=quiz, questions=questions, answer_options=answer_options, existing_scores_count=existing_scores_count)
 
+        return "Unauthorized", 401
 
+    except Exception as e:
+        # Log the error with traceback
+        import traceback
+        traceback.print_exc()
+        flash('Error loading the quiz.', 'error')
+        return redirect(url_for('main.dashboard'))
 
 
 @main.route('/quiz', methods=['GET', 'POST'])
@@ -53,6 +62,9 @@ def quiz_view():
         #print("Generated Quiz Data:", res) 
         return jsonify(res), 200
 
+    # Clear the quiz data from the session
+    session.pop('quiz_data', None)
+
     return render_template('quiz.html')
 
 
@@ -67,8 +79,6 @@ def generate_quiz():
 
     # Retrieve the quiz data from the request
     res = session.get('quiz_data')
-    
-    print("Generated Quiz Data:", res) 
 
     if res is None:
         return "Quiz data not found in request", 400
@@ -126,7 +136,6 @@ def generate_quiz():
     return redirect(url_for('main.dashboard')) 
 
 
-
 @main.route('/delete-quiz/<int:quiz_id>', methods=['GET', 'POST'])
 def delete_quiz(quiz_id):
     if 'user_id' not in session:
@@ -171,10 +180,6 @@ def rename_quiz(quiz_id):
     return redirect(url_for('main.dashboard'))
 
 
-
-
-
-
 @main.route('/submit-quiz', methods=['POST'])
 def submit_quiz():
     try:
@@ -198,23 +203,24 @@ def submit_quiz():
         correct_count = sum(1 for question_id, user_answer in user_answers.items() if user_answer == correct_answers.get(question_id))
 
         if total_questions > 0:
-            score_percentage = (correct_count / total_questions) * 100
+            score_percentage = round((correct_count / total_questions) * 100)
         else:
             score_percentage = 0
 
         # Check if the user has already taken the same quiz
         quiz_id = int(request.form.get('quiz_id'))
         user_id = session.get('user_id')
-        existing_score = Scores.query.filter_by(user_id=user_id, quiz_id=quiz_id).first()
 
-        if existing_score:
-            # Update the existing score
-            existing_score.score_percentage = score_percentage
-            existing_score.datetime = dt.now()
-        else:
+        # Check the number of existing scores for the same user and quiz
+        existing_scores_count = Scores.query.filter_by(user_id=user_id, quiz_id=quiz_id).count()
+
+        if existing_scores_count < 3:
             # Create a new Scores record
             score = Scores(user_id=user_id, datetime=dt.now(), score_percentage=score_percentage, quiz_id=quiz_id)
             db.session.add(score)
+        else:
+            # User has already reached the maximum number of attempts
+            return "You have reached the maximum number of quiz attempts.", 400
 
         db.session.commit()
 
@@ -231,30 +237,24 @@ def submit_quiz():
 
 
 
-
 @main.route('/user-<int:creator_id>-quiz-<int:quiz_number>/score', methods=['GET'])
 def scoreboard(creator_id, quiz_number):
     quiz = Quiz.query.filter_by(user_id=creator_id, quiz_number=quiz_number).first()
     scores = Scores.query.filter_by(quiz_id=quiz.id).all()
-    user_scores = [(score.user.username, round(score.score_percentage)) for score in scores]
 
-    # Print statements for debugging
-    print("Scores:", scores)
-    print("User Scores:", user_scores)
-    print("Quiz:", quiz)
+    # Find the highest score for each user
+    user_scores = {}
+    for score in scores:
+        if score.user.username in user_scores:
+            if score.score_percentage > user_scores[score.user.username]:
+                user_scores[score.user.username] = score.score_percentage
+        else:
+            user_scores[score.user.username] = score.score_percentage
 
-    return render_template('scoreboard.html', user_scores=user_scores, quiz=quiz)
+    # Convert user_scores dictionary to a list of tuples for rendering in the template
+    user_scores_list = [(username, round(score)) for username, score in user_scores.items()]
 
-
-
-
-
-
-
-
-
-
-
+    return render_template('scoreboard.html', user_scores=user_scores_list, quiz=quiz)
 
 
 @main.route('/')
@@ -322,8 +322,6 @@ def register():
     return render_template('register.html')
 
 
-
-
 @main.route('/logout')
 def logout():
     session.clear()
@@ -372,6 +370,7 @@ def dashboard():
         return redirect(url_for('main.login'))
 
     user_id = session['user_id']
+    user = User.query.get(user_id)  # Retrieve the User object from the database
 
     user_quizzes = Quiz.query.filter_by(user_id=user_id).order_by(Quiz.datetime.desc()).all()
     public_quizzes = Quiz.query.filter(Quiz.public_quiz, Quiz.user_id != user_id).order_by(Quiz.datetime.desc()).all()
@@ -382,7 +381,7 @@ def dashboard():
     for quiz in public_quizzes:
         quiz.datetime = quiz.datetime.strftime('%B %d, %Y %H:%M')  # Format the date as desired
 
-    return render_template('dashboard.html', user_quizzes=user_quizzes, public_quizzes=public_quizzes)
+    return render_template('dashboard.html', user=user, user_quizzes=user_quizzes, public_quizzes=public_quizzes)
 
 
 

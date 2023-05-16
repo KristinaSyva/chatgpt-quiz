@@ -28,10 +28,10 @@
   <body>
     {% block navbar %}
     <nav class="navbar navbar-light">
-      <span class="navbar-brand"
-        >{{ request.path.split('/')[-1].title() }}</span
-      >
-      {% if session.get('user_id') %}
+      <span class="navbar-brand">
+        {% block navbar_brand %}{{ request.path.split('/')[-1].title() }} {%
+        endblock %} </span
+      >{% if session.get('user_id') %}
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           {% if request.path != url_for('main.dashboard') %}
