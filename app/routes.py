@@ -3,6 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime as dt
 from sqlalchemy import func
 from datetime import datetime
+import re
 
 
 from .aiapi import generateChatResponse
@@ -288,6 +289,23 @@ def register():
             flash('Passwords do not match', 'danger')
             return redirect(url_for('main.register'))
 
+        # Password validation
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long', 'danger')
+            return redirect(url_for('main.register'))
+        if not re.search(r'\d', password):
+            flash('Password must contain at least one digit', 'danger')
+            return redirect(url_for('main.register'))
+        if not re.search(r'[A-Z]', password):
+            flash('Password must contain at least one uppercase letter', 'danger')
+            return redirect(url_for('main.register'))
+        if not re.search(r'[a-z]', password):
+            flash('Password must contain at least one lowercase letter', 'danger')
+            return redirect(url_for('main.register'))
+        if not re.search(r'[^a-zA-Z0-9]', password):
+            flash('Password must contain at least one symbol', 'danger')
+            return redirect(url_for('main.register'))
+
         existing_user = User.query.filter(db.or_(User.email == email, User.username == username)).first()
         if existing_user:
             flash('Email address or username already in use', 'danger')
@@ -301,6 +319,9 @@ def register():
         return redirect(url_for('main.login'))
 
     return render_template('register.html')
+
+
+
 
 @main.route('/logout')
 def logout():

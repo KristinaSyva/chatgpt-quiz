@@ -31,6 +31,16 @@ navbar %}
 >
   <h1 class="text-center page-header">Register</h1>
   <p class="text-center">Just a few clicks until your first quiz!</p>
+
+  {% with messages = get_flashed_messages() %} {% if messages %}
+  <div class="alert alert-danger">
+    <ul class="mb-0">
+      {% for message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %} {% endwith %}
   <form method="POST" action="{{ url_for('main.register') }}" class="col-5">
     <div class="form-group">
       <label for="username">Username:</label>
@@ -75,6 +85,10 @@ navbar %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <!-- CSRF token -->
     <button type="submit" class="btn btn-primary btn-block">Register</button>
+    <small
+      >Password should be at least 8 characters, include at least one digit, one
+      uppercase letter, one lowercase letter, and one symbol.</small
+    >
   </form>
 
   <small>Or <a href="{{ url_for('main.login') }}">log in</a> instead.</small>
