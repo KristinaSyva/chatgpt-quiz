@@ -231,12 +231,11 @@ def submit_quiz():
 
 
 
-
-@main.route('/user-<int:user_id>-quiz-<int:quiz_number>/score', methods=['GET'])
-def scoreboard(user_id, quiz_number):
-    scores = Scores.query.filter_by(quiz_id=quiz_number).all()
-    user_scores = [(score.user.username, score.score_percentage) for score in scores]
-    quiz = Quiz.query.filter_by(quiz_number=quiz_number).first()
+@main.route('/user-<int:creator_id>-quiz-<int:quiz_number>/score', methods=['GET'])
+def scoreboard(creator_id, quiz_number):
+    quiz = Quiz.query.filter_by(user_id=creator_id, quiz_number=quiz_number).first()
+    scores = Scores.query.filter_by(quiz_id=quiz.id).all()
+    user_scores = [(score.user.username, round(score.score_percentage)) for score in scores]
 
     # Print statements for debugging
     print("Scores:", scores)
@@ -244,6 +243,8 @@ def scoreboard(user_id, quiz_number):
     print("Quiz:", quiz)
 
     return render_template('scoreboard.html', user_scores=user_scores, quiz=quiz)
+
+
 
 
 

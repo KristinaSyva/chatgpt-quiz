@@ -82,7 +82,7 @@
 
   <div id="score-div" class="d-none">
     <h2 id="score-text"></h2>
-    <button class="btn btn-primary" onclick="window.location.href='{{ url_for("main.scoreboard", user_id=session.get("user_id"), quiz_number=quiz.quiz_number) }}'">
+    <button class="btn btn-primary" onclick="window.location.href='{{ url_for("main.scoreboard", creator_id=quiz.user_id, quiz_number=quiz.quiz_number) }}'">
       Scoreboard
     </button>       
   </div>

@@ -10,8 +10,8 @@ class Quiz(db.Model):
     quiz_number = db.Column(db.Integer, nullable=False)
     public_quiz = db.Column(db.Boolean, nullable=False, default=False)
 
-    scores = db.relationship('Scores', backref='quiz', lazy=True)
-    
+    score_records = db.relationship('Scores', backref='quiz', lazy=True)
+
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
@@ -44,7 +44,7 @@ class Scores(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
 
     user = db.relationship('User', backref=db.backref('scores', lazy=True))
-    quiz = db.relationship('Quiz', backref=db.backref('scores', lazy=True))
+    quiz_ref = db.relationship('Quiz', backref=db.backref('scores_ref', lazy=True))
    
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)

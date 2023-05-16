@@ -1,18 +1,15 @@
 {% extends 'base.html' %} 
 {% block content %}
 <div class="container d-flex flex-column justify-content-center align-items-center">
-  <h1 class="mt-5">Generate a quiz</h1>
+  <h1 class="mt-5">Quiz generator</h1>
   <p class="text-center">
     Enter the keywords or describing sentence about the quiz below. For example
     "Music of the 80s, 2 questions". If the Number of questions is not
     specified, 10 questions will be generated.
   </p>
-
-  <div id="list-group" class="list-group w-auto"></div>
-</br>
   <div id="quiz-button" class="input-group justify-content-center mb-3 d-none">
     <button id="generate-quiz-button" class="btn btn-primary">
-      Generate Quiz
+      Generate the quiz!
     </button>
     <div class="input-group justify-content-center mb-3">
       <p class="text-center">
@@ -20,16 +17,19 @@
       </p>
     </div>
   </div>
+  <div id="list-group" class="list-group w-auto"></div>
+</br>
+
 
   <div class="input-group mb-3">
     <input type="text" class="form-control" id="chat-input" />
     <div class="input-group-append">
-      <button id="gpt-button" class="btn btn-primary">Enter</button>
+      <button id="gpt-button" class="btn btn-primary">Enter prompt</button>
     </div>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /> <!-- CSRF token -->
   </div>
   <p class="text-center">
-    When entering a prompt be patient. It can take up to a minute for the quiz
+    When entering a prompt be patient. It can take several minutes for the quiz
     to be generated.
   </p>
 </div>
@@ -43,7 +43,7 @@
       event.preventDefault();
       var prompt = $('#chat-input').val();
       var csrfToken = $('input[name="csrf_token"]').val(); // Retrieve the CSRF token
-
+  
       $.ajax({
         url: '{{ url_for("main.generate_quiz") }}',
         type: 'POST',
@@ -53,6 +53,9 @@
         data: { prompt: prompt },
         success: function(response) {
           // Handle the response
+          $('#quiz-button').removeClass('d-none'); // Show the quiz button
+          $('#chat-input').addClass('d-none');
+          $('#gpt-button').addClass('d-none'); 
         },
         error: function(error) {
           // Handle the error
@@ -60,5 +63,6 @@
       });
     });
   });
+  
 </script>
 {% endblock %}

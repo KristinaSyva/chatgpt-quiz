@@ -1,20 +1,26 @@
 {% extends 'base.html' %} {% block content %}
 
 <div class="container">
-  <h1>Quiz Scores</h1>
-  <h2>{{ quiz.quiz_number }}</h2>
+  <h2>
+    Quiz Scores for
+    <b
+      >{% if quiz.quiz_name %} {{ quiz.quiz_name }} {% else %} Quiz {{
+      quiz.quiz_number }} {% endif %}</b
+    >
+  </h2>
+  <!-- Updated line to display quiz_name -->
   <table class="table">
     <thead>
       <tr>
         <th>Username</th>
-        <th>Score Percentage</th>
+        <th>Score</th>
       </tr>
     </thead>
     <tbody>
       {% for username, score_percentage in user_scores %}
       <tr>
         <td>{{ username }}</td>
-        <td>{{ score_percentage }}</td>
+        <td>{{ score_percentage|int }} %</td>
       </tr>
       {% endfor %}
     </tbody>

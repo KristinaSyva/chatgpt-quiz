@@ -14,10 +14,10 @@ button:focus {
   }
 
 .logo {
-    width: 450px; 
+    width: 590px; 
     height: auto; 
     padding-top: 10vh;
-    padding-bottom: 10vh;
+    padding-bottom: 5vh;
   }
 
 .btn-primary {
