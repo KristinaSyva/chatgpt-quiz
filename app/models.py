@@ -12,6 +12,12 @@ class Quiz(db.Model):
 
     score_records = db.relationship('Scores', backref='quiz', lazy=True)
 
+    scores_ref = db.relationship(
+        'Scores',
+        backref='quiz',
+        lazy='dynamic',
+        overlaps="quiz,score_records"  # Add the 'overlaps' parameter
+    )
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)

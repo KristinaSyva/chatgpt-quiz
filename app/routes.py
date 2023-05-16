@@ -274,8 +274,9 @@ def login():
             return redirect(url_for('main.dashboard'))
         else:
             flash('Username or password is incorrect', 'danger')
-
+    
     return render_template('login.html')
+
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():

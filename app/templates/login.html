@@ -30,6 +30,16 @@
 >
   <h1 class="text-center page-header">Log in</h1>
   <p class="text-center">Log in to make some magic!</p>
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %}
+  <div class="alert alert-danger">
+    <ul class="list-unstyled">
+      {% for category, message in messages %}
+      <li>{{ message }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %} {% endwith %}
   <form method="POST" action="{{ url_for('main.login') }}" class="col-5">
     <div class="form-group">
       <label for="identifier">Username or Email:</label>
