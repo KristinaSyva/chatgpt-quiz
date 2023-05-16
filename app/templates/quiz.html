@@ -1,10 +1,11 @@
 {% extends 'base.html' %} 
 {% block content %}
 <div class="container d-flex flex-column justify-content-center align-items-center">
-  <h1 class="mt-5">Quiz generator</h1>
+  <h1 class="mt-5"><b>Quiz generator</b></h1>
+  <br />
   <p class="text-center">
     Enter the keywords or describing sentence about the quiz below. For example
-    "Music of the 80s, 2 questions". If the Number of questions is not
+    <b>"Music of the 80s, 2 questions"</b>. If the Number of questions is not
     specified, 10 questions will be generated.
   </p>
   <div id="quiz-button" class="input-group justify-content-center mb-3 d-none">
@@ -54,8 +55,6 @@
         success: function(response) {
           // Handle the response
           $('#quiz-button').removeClass('d-none'); // Show the quiz button
-          $('#chat-input').addClass('d-none');
-          $('#gpt-button').addClass('d-none'); 
         },
         error: function(error) {
           // Handle the error

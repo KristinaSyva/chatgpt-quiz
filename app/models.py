@@ -10,13 +10,13 @@ class Quiz(db.Model):
     quiz_number = db.Column(db.Integer, nullable=False)
     public_quiz = db.Column(db.Boolean, nullable=False, default=False)
 
-    score_records = db.relationship('Scores', backref='quiz', lazy=True)
+    score_records = db.relationship('Scores', back_populates='quiz', lazy=True)
 
-    scores_ref = db.relationship(
+    scores = db.relationship(
         'Scores',
-        backref='quiz',
+        back_populates='quiz_obj',
         lazy='dynamic',
-        overlaps="quiz,score_records"  # Add the 'overlaps' parameter
+        overlaps="quiz,score_records"
     )
 class GameQuestions(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -40,8 +40,8 @@ class GameAnswers(db.Model):
     correct_answer = db.Column(db.Boolean, nullable=False)
 
     quiz = db.relationship('Quiz', backref=db.backref('answers', lazy=True))
-    question = db.relationship('GameQuestions', backref=db.backref('answers', lazy=True))
-
+    question = db.relationship('GameQuestions', backref=db.backref('answers', lazy=True))   
+    
 class Scores(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -50,8 +50,9 @@ class Scores(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
 
     user = db.relationship('User', backref=db.backref('scores', lazy=True))
-    quiz_ref = db.relationship('Quiz', backref=db.backref('scores_ref', lazy=True))
-   
+    quiz = db.relationship('Quiz', back_populates='score_records')
+    quiz_obj = db.relationship('Quiz', back_populates='scores', overlaps="quiz,score_records")
+    
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(30), unique=True, nullable=False)  # Add username field

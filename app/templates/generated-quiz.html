@@ -60,7 +60,7 @@
     <input type="hidden" name="quiz_id" value="{{ quiz.id }}" />
 
     {% for question in questions %}
-    <h3>Question {{ question.question_number }}</h3>
+    <h4>Question {{ question.question_number }}</h4>
     <p>{{ question.question_text }}</p>
     {% set current_question_id = question.id %} {% for answer in answer_options
     %} {% if answer.question_id == current_question_id %}
@@ -73,8 +73,7 @@
       {{ answer.answer_letter }}. {{ answer.answer_text }}
     </label>
     <br />
-    {% endif %} {% endfor %} {% endfor %}
-
+    {% endif %} {% endfor %} <br />{% endfor %}
     <button id="submit-button" class="btn btn-primary" type="submit">
       Submit
     </button>

@@ -1,8 +1,11 @@
 {% extends 'base.html' %} {% block content %}
-<h1>Welcome to Quiz Genius!</h1>
+<br />
+<h1>Welcome to <b>Quiz Genius!</b></h1>
+<br />
 <a class="btn btn-primary" href="{{ url_for('main.quiz_view') }}"
   >Create a new Quiz</a
 ><br /><br />
+
 <h2>My quizzes</h2>
 <div class="row mt-4">
   {% for quiz in user_quizzes %}
@@ -15,12 +18,18 @@
         </h5>
         <p class="card-text">Created at: {{ quiz.datetime|safe }}</p>
         <div class="d-flex justify-content-between">
-          <a
+          <button
             class="btn btn-primary"
-            href="{{ url_for('main.quiz_page', user_id=quiz.user_id, quiz_number=quiz.quiz_number) }}"
-            >Play</a
+            onclick="window.location.href='{{ url_for('main.quiz_page', user_id=quiz.user_id, quiz_number=quiz.quiz_number) }}'"
           >
-          <button class="btn btn-info">Share</button>
+            Play
+          </button>
+          <button
+            class="btn btn-info ml-2"
+            onclick="window.location.href='{{ url_for('main.scoreboard', creator_id=quiz.user_id, quiz_number=quiz.quiz_number) }}'"
+          >
+            Scores
+          </button>
         </div>
         <div class="form-check form-switch mt-3">
           <input
@@ -30,7 +39,9 @@
             {%
             if
             quiz.public_quiz
-            %}checked{%
+            %}
+            checked
+            {%
             endif
             %}
             data-csrf="{{ csrf_token() }}"
@@ -120,6 +131,7 @@
   </div>
 
   {% endfor %}
+  <br />
   <div class="col-12"><h2>Public quizzes</h2></div>
   {% for quiz in public_quizzes %}
   <div class="col-md-4">

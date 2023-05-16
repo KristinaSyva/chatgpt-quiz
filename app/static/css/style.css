@@ -25,22 +25,26 @@ button:focus {
     font-weight: bolder;
     padding: 1rem 4rem;
     border: none;
-    margin-right: 3vh;
+    margin-right: 2vh;
     border-radius: 10px;
     }
 
+    
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active {
     box-shadow: none !important;
     outline: none !important;
   }
+
+button#gpt-button {
+    border-radius: 0 10px 10px 0;
+}
   
 .btn-info {
     font-weight: bolder;
     padding: 1rem 2rem;
     border: none;
-    margin-right: 3vh;
     border-radius: 10px;
   }
 
