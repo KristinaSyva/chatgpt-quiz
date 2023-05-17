@@ -1,3 +1,4 @@
+psycopg2-binary 
 aiohttp
 aiosignal
 async-timeout
