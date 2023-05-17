@@ -64,6 +64,7 @@ button#gpt-button {
     width: 1000px;
     height: 639px;
     background-image: url("../images/Illustration.png");
+    pointer-events: none;
 }
   
 .navbar {

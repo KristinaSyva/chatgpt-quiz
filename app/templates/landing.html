@@ -1,30 +1,4 @@
-{% extends 'base.html' %} {% block navbar %}
-
-<nav class="navbar navbar-light">
-  <div class="collapse navbar-collapse" id="navbarNav">
-    <ul class="navbar-nav">
-      <li class="nav-item"></li>
-      <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('main.login') }}">Login</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.register') }}">Register</a>
-      </li>
-    </ul>
-  </div>
-  <button
-    class="navbar-toggler ml-auto border-0"
-    type="button"
-    data-bs-toggle="collapse"
-    data-bs-target="#navbarNav"
-    aria-controls="navbarNav"
-    aria-expanded="false"
-    aria-label="Toggle navigation"
-  >
-    <span class="navbar-toggler-icon"></span>
-  </button>
-</nav>
-{% endblock %} {% block content %}
+{% extends 'base.html' %} {% block navbar %} {% endblock %} {% block content %}
 <div class="separate-div"></div>
 <div class="row">
   <div class="col-6">
