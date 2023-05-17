@@ -1,7 +1,5 @@
 from flask import Flask, render_template, jsonify, request
 import os
-import openai
-#import aiapi
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 
