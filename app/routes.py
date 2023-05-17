@@ -277,7 +277,7 @@ def login():
     
     return render_template('login.html')
 
-
+'''
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -321,6 +321,7 @@ def register():
 
     return render_template('register.html')
 
+'''
 
 @main.route('/logout')
 def logout():
