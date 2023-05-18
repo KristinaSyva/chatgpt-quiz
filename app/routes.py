@@ -275,6 +275,7 @@ def login():
         else:
             flash('Username or password is incorrect', 'danger')
     
+    session.pop('user_id', None)
     return render_template('login.html')
 
 

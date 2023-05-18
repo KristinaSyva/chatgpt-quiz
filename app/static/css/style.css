@@ -16,7 +16,7 @@ button:focus {
 .logo {
     width: 590px; 
     height: auto; 
-    padding-top: 10vh;
+    padding-top: 15vh;
     padding-bottom: 5vh;
   }
 
@@ -83,7 +83,7 @@ button#gpt-button {
 }
 
 .page-header, small {
-    padding: 3vh 0;
+    padding: 2vh 0;
 }
 
 .my-input {

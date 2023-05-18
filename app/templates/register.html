@@ -84,14 +84,13 @@ navbar %}
     </div>
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <!-- CSRF token -->
-    <button type="submit" class="btn btn-primary btn-block">Register</button>
-    <br />
     <small
       >Password should be at least 8 characters, include at least one digit, one
       uppercase letter, one lowercase letter, and one symbol.</small
     >
+    <br />
+    <button type="submit" class="btn btn-primary btn-block">Register</button>
   </form>
-
   <small>Or <a href="{{ url_for('main.login') }}">log in</a> instead.</small>
 </div>
 {% endblock %}
