@@ -1,0 +1,32 @@
+{% extends 'base.html' %} 
+{% from 'bootstrap5/form.html' import render_field  %}
+
+{% block title %}Log in{% endblock %}
+
+
+{% block content %}
+<div
+  class="container d-flex flex-column justify-content-center align-items-center"
+>
+  <h1 class="text-center page-header">Log in</h1>
+  <p class="text-center">Log in to make some magic!</p>
+
+  <form method="POST" action="{{ url_for('auth.login') }}" class="col-5">
+    {{ form.csrf_token() }}
+    <div class="form-group">
+
+      {{ render_field(form.identifier, class="form-control w-100 form-control-lg" ) }}
+    </div>
+    <div class="form-group">
+      {{ render_field(form.password, class="form-control w-100 form-control-lg" ) }}
+    </div>
+    {{ render_field(form.submit, class="btn btn-primary btn-block" ) }}
+
+  </form>
+  <small
+    >Or
+    <a href="{{ url_for('auth.register') }}">create an account</a>
+    instead.</small
+  >
+</div>
+{% endblock %}

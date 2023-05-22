@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container d-flex flex-column justify-content-center align-items-center">
+  <h1 class="mt-5">Generate a quiz</h1>
+  <p class="text-center">
+    Enter the keywords or describing sentence about the quiz below. For example
+    "Music of the 80s, 2 questions". If the Number of questions is not
+    specified, 10 questions will be generated.
+  </p>
+  <div  class="d-flex justify-content-center align-items-center">
+    <img id="spinner" src="{{ url_for('static', filename='Spinner.gif') }}" alt="spinner.gif"  class="d-none">
+  </div>
+  <div  class="d-flex justify-content-center align-items-center">
+    <p id="error-mg" class="text-danger d-none"></p>
+  </div>
+  <div id="list-group" class="list-group w-auto d-none"></div>
+</br>
+  <div id="quiz-button" class="input-group justify-content-center mb-3 d-none">
+    <button id="generate-quiz-button" class="btn btn-primary">
+      Generate Quiz
+    </button>
+    <div class="input-group justify-content-center mb-3">
+      <p class="text-center">
+        </br>Or <a href="{{ url_for('main.quiz_view') }}">Refresh</a> the page a new prompt below to generate a new quiz!
+      </p>
+    </div>
+  </div>
+
+  <div class="input-group mb-3">
+    <input type="text" class="form-control" id="chat-input" />
+    <div class="input-group-append">
+      <button id="gpt-button" class="btn btn-primary">Enter</button>
+    </div>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" /> <!-- CSRF token -->
+  </div>
+  <p class="text-center">
+    When entering a prompt be patient. It can take up to a minute for the quiz
+    to be generated.
+  </p>
+</div>
+{% endblock %}
+
+{% block footer %}
+<script>
+  function alertMsg(textStr){
+    // Update the text content with a message
+    $("#error-mg").text(textStr);
+    $("#error-mg").removeClass("d-none");
+
+    // Remove the message after 
+    setTimeout(function() {
+      $("#error-mg").text("");
+      $("#error-mg").addClass("d-none");
+    }, 1500);
+  }
+</script>
+
+<script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+<script>
+  $(document).ready(function() {
+    $('#generate-quiz-button').click(function(event) {
+
+      $("#gpt-button").prop("disabled", true);
+      $("#generate-quiz-button").prop("disabled", true);
+      $("#list-group").addClass("d-none");
+      $("#spinner").removeClass("d-none");
+  
+      event.preventDefault();
+      var prompt = $('#chat-input').val();
+      var csrfToken = $('input[name="csrf_token"]').val(); // Retrieve the CSRF token
+  
+      $.ajax({
+        url: '{{ url_for("main.generate_quiz") }}',
+        type: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken // Set the CSRF token as a header
+        },
+        data: { prompt: prompt },
+        success: function(response) {
+          // Handle the response
+          window.location.href = "/dashboard";
+        },
+        error: function(error) {
+          // Handle the error
+          console.log(error)
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

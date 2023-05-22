@@ -1,0 +1,34 @@
+{% extends 'base.html' %} 
+{% from 'bootstrap5/form.html' import render_field  %}
+
+{% block title %}Register{% endblock %} 
+
+
+
+{% block content %}
+<div
+  class="container d-flex flex-column justify-content-center align-items-center"
+>
+  <h1 class="text-center page-header">Register</h1>
+  <p class="text-center">Just a few clicks until your first quiz!</p>
+
+  <form method="POST" action="{{ url_for('auth.register') }}" class="col-5">
+    {{ form.csrf_token() }}
+    <div class="form-group">
+      {{ render_field(form.username, class="form-control w-100 form-control-lg" ) }}
+    </div>
+    <div class="form-group">
+      {{ render_field(form.email, class="form-control w-100 form-control-lg" ) }}
+    </div>
+    <div class="form-group">
+      {{ render_field(form.password, class="form-control w-100 form-control-lg" ) }}
+    </div>
+    <div class="form-group">
+      {{ render_field(form.confirm_password, class="form-control w-100 form-control-lg" ) }}
+    </div>
+    {{ render_field(form.submit, class="btn btn-primary btn-block" ) }}
+  </form>
+
+  <small>Or <a href="{{ url_for('auth.login') }}">log in</a> instead.</small>
+</div>
+{% endblock %}

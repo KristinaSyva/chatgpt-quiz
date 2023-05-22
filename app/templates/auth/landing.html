@@ -1,0 +1,29 @@
+{% extends 'base.html' %} 
+
+
+{% block content %}
+<div class="separate-div"></div>
+<div class="row">
+  <div class="col-6">
+    <img
+      src="{{ url_for('static', filename='images/logo.svg') }}"
+      alt="Quiz IT!"
+      class="logo"
+    />
+    <p class="main-para">
+      Generate AI powered quizzes with just minutes to enjoy with friends,
+      coworkers and loved ones!
+    </p>
+    <div class="buttons">
+      <a href="{{ url_for('auth.login') }}">
+        <button class="btn btn-primary">Login ></button>
+      </a>
+      <a href="{{ url_for('auth.register') }}">
+        <button class="btn btn-primary" id="reg_btn">
+          <span>Register > </span>
+        </button>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

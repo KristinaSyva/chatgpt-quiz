@@ -1,0 +1,27 @@
+{% extends 'base.html' %} 
+
+
+{% block content %}
+<div class="container">
+  <h1>Quiz Scores</h1>
+  <h2>{{ quiz.quiz_number }}</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Users</th>
+        <th>Timestamp</th>
+        <th>Score Percentage</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.user.username }}</td>
+        <td>{{ user.datetime.strftime('%b, %d %Y %I:%M %p') }}</td>
+        <td>{{ user.score_percentage }} %</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block nav_title %}
+{% if quiz.quiz_name %} 
+Quiz - {{ quiz.quiz_name }} 
+{% else %} 
+Quiz 
+{{ quiz.quiz_number }} 
+{% endif %}
+{% endblock nav_title %}
+
+
+{% block content %}
+<div
+  class="container d-flex flex-column justify-content-center align-items-center"
+>
+  <form id="quiz-form" action="{{ url_for('main.submit_quiz') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <input type="hidden" name="quiz_id" value="{{ quiz.id }}" />
+
+    {% for question in questions %}
+    <h3>Question {{ question.question_number }}</h3>
+    <p>{{ question.question_text }}</p>
+    {% set current_question_id = question.id %} 
+    {% for answer in answer_options%} 
+    {% if answer.question_id == current_question_id %}
+    <label class="radio-label">
+      <input
+        type="radio"
+        name="answer_{{ question.id }}"
+        value="{{ answer.answer_letter }}"
+      />
+      {{ answer.answer_letter }}. {{ answer.answer_text }}
+    </label>
+    <br />
+    {% endif %} 
+    {% endfor %} 
+    {% endfor %}
+
+    <button id="submit-button" class="btn btn-primary" type="submit">
+      Submit
+    </button>
+  </form>
+
+  <div id="score-div" class="d-none">
+    <h2 id="score-text"></h2>
+    <a class="btn btn-primary" href="{{ url_for("main.scoreboard", quiz_id=quiz.id) }}">
+      Scoreboard
+    </a>       
+  </div>
+</div>
+{% endblock %} 
+
+{% block footer %}
+<script>
+  $(document).ready(function () {
+    $("#quiz-form").submit(function (event) {
+      event.preventDefault();
+
+      var form = $(this);
+      var url = form.attr("action");
+
+      $.ajax({
+        type: "POST",
+        url: url,
+        data: form.serialize(),
+        success: function (response) {
+          console.log(response)
+          var scorePercentage = response.score_percentage;
+          $("#score-text").text("Your score is " + scorePercentage + "%");
+          $("#score-div").removeClass("d-none");
+        },
+        error: function (error) {
+          console.log("Failed to submit the quiz.");
+        },
+      });
+    });
+  });
+</script>
+{% endblock %}

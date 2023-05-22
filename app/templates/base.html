@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>{% block title %}Quiz genius!{% endblock %}</title>
+    <title>{% block title %}Quiz It!{% endblock %}</title>
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
@@ -24,34 +24,43 @@
     <script src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
     <!-- Bootstrap JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    {{ toastr.include_jquery() }}
+    {{ toastr.include_toastr_css() }}
+    {{ toastr.message() }}
+ 
   </head>
   <body>
-    {% block navbar %}
     <nav class="navbar navbar-light">
       <span class="navbar-brand">
-        {% block navbar_brand %}{{ request.path.split('/')[-1].title() }} {%
-        endblock %} </span
-      >{% if session.get('user_id') %}
+          {% block nav_title %}
+          {{ request.path.split('/')[-1].title() }}
+          {% endblock nav_title %}
+      </span>
+      {% if current_user.is_authenticated %}
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav">
           {% if request.path != url_for('main.dashboard') %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('main.dashboard') }}"
-              >Dashboard</a
-            >
+            <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
           </li>
-          {% endif %} {% if request.path != url_for('main.quiz_view') %}
+          {% endif %} 
+          
+          {% if request.path != url_for('main.quiz_view') %}
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('main.quiz_view') }}"
               >Create Quiz</a
             >
           </li>
           {% endif %}
+
+          {% if request.path != url_for('auth.account') %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('main.account') }}">Account</a>
+            <a class="nav-link" href="{{ url_for('auth.account') }}">Account</a>
           </li>
+          {% endif %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('main.logout') }}">Log out</a>
+            <a class="nav-link" href="{{ url_for('auth.logout') }}">Log out</a>
           </li>
         </ul>
       </div>
@@ -67,22 +76,38 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       {% else %}
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item"></li>
+          <li class="nav-item active">
+            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+          </li>
+        </ul>
+      </div>
       <button
-        class="navbar-toggler ml-auto border-0"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
+      class="navbar-toggler ml-auto border-0"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon"></span>
       </button>
       {% endif %}
     </nav>
-    {% endblock %}
 
-    <main class="container">{% block content %}{% endblock %}</main>
+    <main class="container mt-3">
+      {% block content %}
+      {% endblock %}
+    </main>
+
+
+    {{ toastr.include_toastr_js() }}
 
     {% block footer %}
     <footer class="container-fluid mt-3">
