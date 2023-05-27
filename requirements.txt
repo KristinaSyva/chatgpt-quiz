@@ -31,3 +31,5 @@ urllib3
 Werkzeug
 WTForms
 yarl
+gunicorn
+psycopg2-binary
